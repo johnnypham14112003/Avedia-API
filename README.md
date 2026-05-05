@@ -9,13 +9,18 @@
 ## Packages
 
 ### App Layer
+- [DotNetEnv](https://www.nuget.org/packages/DotNetEnv/3.2.0) `3.2.0` *(For loading env file)*
 
 ### BusinessLogic Layer
 - [Mapster](https://www.nuget.org/packages/Mapster/10.0.7) `10.0.7` *(For mapping models)*
-- [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/13.0.4) `13.0.4`
 
 ### DataAccess Layer
-- `Entity Framework 6`
 - [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/10.0.1) `10.0.1`
+- [Microsoft.EntityFrameworkCore.Tools](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools/10.0.7) `10.0.7` *(For scraffold)*
+- [Microsoft.EntityFrameworkCore.Design](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design/10.0.7) `10.0.7` *(For scraffold)*
 
-## 
+## How to use
+
+### Create database and scraffold
+
+dotnet ef dbcontext scaffold "Host=localhost;Database=avedia;Username=postgres;Password=your_password" Npgsql.EntityFrameworkCore.PostgreSQL -o Models -c AVEDbContext
