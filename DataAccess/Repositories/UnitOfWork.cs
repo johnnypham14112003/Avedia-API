@@ -5,26 +5,15 @@ using System.Collections;
 
 namespace DataAccess.Repositories;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork(AVEDbContext context) : IUnitOfWork
 {
-    private readonly DbContext _context;
+    private readonly DbContext _context = context;
     private IDbContextTransaction? _transaction;
-    private Hashtable? _repositories; // Lưu trữ (cache) các GenericRepo đã được gọi
+    private Hashtable? _repositories; // Save (cache) GenericRepo called
 
-    // Backing field cho Custom Repo
-    //private IExampleCustomRepository? _exampleRepository;
-    public UnitOfWork(AVEDbContext context)
+    public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : class
     {
-        _context = context;
-    }
-
-    // Lazy load: if not call -> not create new AccountRepository()
-    //public IExampleCustomRepository ExampleModels => _exampleRepository ??= new ExampleCustomRepository(_context);
-
-    // This method auto create and return GenericRepository for any Entity
-    public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
-    {
-        _repositories ??= new Hashtable();
+        _repositories ??= [];
 
         var type = typeof(TEntity).Name;
 
@@ -38,16 +27,11 @@ public class UnitOfWork : IUnitOfWork
         return (IGenericRepository<TEntity>)_repositories[type]!;
     }
 
-    /// <summary>
-    /// This method is "Save Change" of DbContext for saving data that previous handle
-    /// </summary>
-    /// <returns>Number of affected records</returns>
     public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
 
 
     // ---------------< TRANSACTION >---------------
     public async Task BeginTransactionAsync() => _transaction = await _context.Database.BeginTransactionAsync();
-
     public async Task CommitAsync()
     {
         try
@@ -60,7 +44,6 @@ public class UnitOfWork : IUnitOfWork
             if (_transaction != null) await _transaction.DisposeAsync();
         }
     }
-
     public async Task RollbackAsync()
     {
         if (_transaction != null)
@@ -75,4 +58,36 @@ public class UnitOfWork : IUnitOfWork
         _context.Dispose();
         GC.SuppressFinalize(this);
     }
+
+    /// <summary><![CDATA[
+    ///public async Task TransferMoneyAsync(int fromAccountId, int toAccountId, decimal amount)
+    ///{
+    ///    // Create Transaction
+    ///    await _unitOfWork.BeginTransactionAsync();
+    ///
+    ///    try
+    ///    {
+    ///        // 1. decrease money
+    ///        ...
+    ///        await accountRepo.UpdateAsync(fromAcc);
+    ///
+    ///        // 2. add money
+    ///        ...
+    ///        await accountRepo.UpdateAsync(toAcc);
+    ///
+    ///        // 3. write log
+    ///        await logRepo.AddAsync(new TransactionHistory { info...});
+    ///
+    ///        // 4. Confirm data save success
+    ///        await _unitOfWork.CommitAsync();
+    ///    }
+    ///    catch (Exception ex)
+    ///    {
+    ///        // if error (eg: not enough money, server error), ROLLBACK all
+    ///        await _unitOfWork.RollbackAsync();
+    ///        throw new Exception("Transfer failed", ex);
+    ///    }
+    ///}
+    /// ]]></summary>
+    private static void ExampleTransaction() { }
 }
