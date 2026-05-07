@@ -72,11 +72,13 @@ public partial class AVEDbContext : DbContext
             entity.Property(e => e.JoinedDate)
                 .HasDefaultValueSql("CURRENT_DATE")
                 .HasColumnName("joined_date");
-            entity.Property(e => e.JwtSession).HasColumnName("jwt_session");
             entity.Property(e => e.MeritPoint).HasColumnName("merit_point");
             entity.Property(e => e.Nationality)
                 .HasMaxLength(100)
                 .HasColumnName("nationality");
+            entity.Property(e => e.OtpCode)
+                .HasMaxLength(20)
+                .HasColumnName("otp_code");
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
             entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
             entity.Property(e => e.RefreshTokenExpirytime)
@@ -124,6 +126,8 @@ public partial class AVEDbContext : DbContext
 
             entity.ToTable("account_notifications");
 
+            entity.HasIndex(e => e.AccountId, "idx_account_notifications_unread").HasFilter("(is_read = false)");
+
             entity.Property(e => e.AccountId).HasColumnName("account_id");
             entity.Property(e => e.NotificationId).HasColumnName("notification_id");
             entity.Property(e => e.CreatedDate)
@@ -148,6 +152,22 @@ public partial class AVEDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("actors_pkey");
 
             entity.ToTable("actors");
+
+            entity.HasIndex(e => e.CupSize, "idx_actors_cup_size");
+
+            entity.HasIndex(e => e.DebutDate, "idx_actors_debut_date");
+
+            entity.HasIndex(e => e.FullName, "idx_actors_full_name");
+
+            entity.HasIndex(e => e.Gender, "idx_actors_gender");
+
+            entity.HasIndex(e => e.Height, "idx_actors_height");
+
+            entity.HasIndex(e => e.Nationality, "idx_actors_nationality");
+
+            entity.HasIndex(e => e.StageName, "idx_actors_stage_name");
+
+            entity.HasIndex(e => e.Status, "idx_actors_status");
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
@@ -183,6 +203,8 @@ public partial class AVEDbContext : DbContext
             entity.HasKey(e => new { e.ActorId, e.ImageId }).HasName("actor_images_pkey");
 
             entity.ToTable("actor_images");
+
+            entity.HasIndex(e => e.ImageId, "idx_actor_images_image_id");
 
             entity.Property(e => e.ActorId).HasColumnName("actor_id");
             entity.Property(e => e.ImageId).HasColumnName("image_id");
@@ -240,6 +262,10 @@ public partial class AVEDbContext : DbContext
 
             entity.ToTable("contributions");
 
+            entity.HasIndex(e => e.RequestedDate, "idx_contributions_pending").HasFilter("((status)::text = 'Pending'::text)");
+
+            entity.HasIndex(e => new { e.TargetType, e.TargetId }, "idx_contributions_target");
+
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
@@ -279,6 +305,10 @@ public partial class AVEDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("favorites_pkey");
 
             entity.ToTable("favorites");
+
+            entity.HasIndex(e => e.LoverId, "idx_favorites_lover_id");
+
+            entity.HasIndex(e => new { e.TargetType, e.TargetId }, "idx_favorites_target");
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
@@ -436,6 +466,22 @@ public partial class AVEDbContext : DbContext
 
             entity.ToTable("videos");
 
+            entity.HasIndex(e => e.Code, "idx_videos_code");
+
+            entity.HasIndex(e => e.Description, "idx_videos_description");
+
+            entity.HasIndex(e => e.Director, "idx_videos_director");
+
+            entity.HasIndex(e => e.OriginalTitle, "idx_videos_original_title");
+
+            entity.HasIndex(e => e.ReleaseDate, "idx_videos_release_date");
+
+            entity.HasIndex(e => e.Series, "idx_videos_series");
+
+            entity.HasIndex(e => e.Status, "idx_videos_status");
+
+            entity.HasIndex(e => e.Title, "idx_videos_title");
+
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
@@ -453,9 +499,9 @@ public partial class AVEDbContext : DbContext
                 .HasColumnName("language");
             entity.Property(e => e.OriginalTitle).HasColumnName("original_title");
             entity.Property(e => e.ReleaseDate).HasColumnName("release_date");
-            entity.Property(e => e.Serie)
+            entity.Property(e => e.Series)
                 .HasMaxLength(200)
-                .HasColumnName("serie");
+                .HasColumnName("series");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
                 .HasColumnName("status");
@@ -476,6 +522,7 @@ public partial class AVEDbContext : DbContext
                     {
                         j.HasKey("VideoId", "GenreId").HasName("video_genres_pkey");
                         j.ToTable("video_genres");
+                        j.HasIndex(new[] { "GenreId" }, "idx_video_genres_genre_id");
                         j.IndexerProperty<Guid>("VideoId").HasColumnName("video_id");
                         j.IndexerProperty<Guid>("GenreId").HasColumnName("genre_id");
                     });
@@ -495,6 +542,7 @@ public partial class AVEDbContext : DbContext
                     {
                         j.HasKey("VideoId", "LabelId").HasName("video_labels_pkey");
                         j.ToTable("video_labels");
+                        j.HasIndex(new[] { "LabelId" }, "idx_video_labels_label_id");
                         j.IndexerProperty<Guid>("VideoId").HasColumnName("video_id");
                         j.IndexerProperty<Guid>("LabelId").HasColumnName("label_id");
                     });
@@ -514,6 +562,7 @@ public partial class AVEDbContext : DbContext
                     {
                         j.HasKey("VideoId", "ProducerId").HasName("video_producers_pkey");
                         j.ToTable("video_producers");
+                        j.HasIndex(new[] { "ProducerId" }, "idx_video_producers_producer_id");
                         j.IndexerProperty<Guid>("VideoId").HasColumnName("video_id");
                         j.IndexerProperty<Guid>("ProducerId").HasColumnName("producer_id");
                     });
@@ -533,6 +582,7 @@ public partial class AVEDbContext : DbContext
                     {
                         j.HasKey("VideoId", "TagId").HasName("video_tags_pkey");
                         j.ToTable("video_tags");
+                        j.HasIndex(new[] { "TagId" }, "idx_video_tags_tag_id");
                         j.IndexerProperty<Guid>("VideoId").HasColumnName("video_id");
                         j.IndexerProperty<Guid>("TagId").HasColumnName("tag_id");
                     });
@@ -543,6 +593,8 @@ public partial class AVEDbContext : DbContext
             entity.HasKey(e => new { e.VideoId, e.ActorId }).HasName("video_actors_pkey");
 
             entity.ToTable("video_actors");
+
+            entity.HasIndex(e => e.ActorId, "idx_video_actors_actor_id");
 
             entity.Property(e => e.VideoId).HasColumnName("video_id");
             entity.Property(e => e.ActorId).HasColumnName("actor_id");
@@ -567,6 +619,8 @@ public partial class AVEDbContext : DbContext
             entity.HasKey(e => new { e.VideoId, e.ImageId }).HasName("video_images_pkey");
 
             entity.ToTable("video_images");
+
+            entity.HasIndex(e => e.ImageId, "idx_video_images_image_id");
 
             entity.Property(e => e.VideoId).HasColumnName("video_id");
             entity.Property(e => e.ImageId).HasColumnName("image_id");

@@ -10,7 +10,7 @@
 CREATE TABLE IF NOT EXISTS accounts (
 	"id" UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
 	avatar_url TEXT,
-	jwt_session TEXT,
+	otp_code VARCHAR(20),
 	refresh_token TEXT,
 	refresh_token_expirytime TIMESTAMP(0),
 	user_name VARCHAR(50) UNIQUE NOT NULL,
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS videos (
 	original_title TEXT,
 	description TEXT,
 	duration_minutes INTEGER NOT NULL DEFAULT 0,
-	serie VARCHAR(200),
+	series VARCHAR(200),
 	episode SMALLINT NOT NULL DEFAULT 1,
 	director TEXT,
 	release_date DATE,
@@ -208,7 +208,7 @@ CREATE TABLE IF NOT EXISTS actor_images (
 --===========================[ INDEXING ]===========================
 --==================================================================
 -- primary key default index search left -> right
---(eg: key(video_id, actor_id) <=> search all actor by video_id <=> mean: search of left)
+--(eg: key(video_id, actor_id) <=> search all actor by video_id <=> mean: get all by left id)
 
 -- create index in reverse for search video by actor_id
 CREATE INDEX idx_video_actors_actor_id ON video_actors (actor_id);

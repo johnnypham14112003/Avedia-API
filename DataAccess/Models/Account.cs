@@ -9,7 +9,7 @@ public partial class Account
 
     public string? AvatarUrl { get; set; }
 
-    public string? JwtSession { get; set; }
+    public string? OtpCode { get; set; }
 
     public string? RefreshToken { get; set; }
 

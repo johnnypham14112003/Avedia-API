@@ -17,7 +17,7 @@ public partial class Video
 
     public int DurationMinutes { get; set; }
 
-    public string? Serie { get; set; }
+    public string? Series { get; set; }
 
     public short Episode { get; set; }
 
