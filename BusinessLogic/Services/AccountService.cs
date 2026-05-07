@@ -1,60 +1,104 @@
-﻿using BusinessLogic.Interfaces;
+﻿using BusinessLogic.Extensions.Exceptions;
+using BusinessLogic.Extensions.Utils;
+using BusinessLogic.Interfaces;
+using BusinessLogic.Models.StronglyTyped;
+using BusinessLogic.Models.View.Request;
+using BusinessLogic.Models.View.Response;
 using DataAccess.Interfaces;
+using DataAccess.Models;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace BusinessLogic.Services;
 
 public class AccountService : IAccountService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ITokenService _tokenService;
 
-    public AccountService(IUnitOfWork unitOfWork)
+    public AccountService(IUnitOfWork unitOfWork, TokenService tokenService)
     {
         _unitOfWork = unitOfWork;
+        _tokenService = tokenService;
     }
-    /* Example
-     public async Task TransferMoneyAsync(int fromAccountId, int toAccountId, decimal amount)
+    public async Task<AuthRs> LoginByPasswordAsync(AuthRq authRequest)
     {
-        // Create Transaction
-        await _unitOfWork.BeginTransactionAsync();
+        // Validate email
+        if (BoolUtils.IsValidEmail(authRequest.Email) == false)
+            throw new BadRequestException("Invalid Email Format!");
 
-        try
+        // Check account in database
+        var existAccount = await _unitOfWork.GetRepository<Account>().GetOneAsync(
+            acc => acc.Email.ToLower().Equals(authRequest.Email.ToLower()));
+
+        // Validate password with hashed password using custom method for security
+        if (existAccount == null ||
+            BoolUtils.VerifyPassword(authRequest.Password, existAccount.PasswordHash) == false)
+            throw new BadRequestException("Invalid email or password!");
+
+        // Generate tokens
+        var accessToken = _tokenService.GenerateAccessToken(existAccount);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+        var refreshExpireTime = _tokenService.GetExpirationTimes();
+
+        // Save refresh token infos
+        existAccount.RefreshToken = refreshToken;
+        existAccount.RefreshTokenExpirytime = refreshExpireTime;
+        await _unitOfWork.CompleteAsync();
+
+        return new AuthRs
         {
-            // AUTO call Repo without creating class AccountRepository
-            var accountRepo = _unitOfWork.Repository<Account>(); 
-            var logRepo = _unitOfWork.Repository<TransactionHistory>();
-
-            // 1. decrease money
-            var fromAcc = await accountRepo.GetByIdAsync(fromAccountId);
-            fromAcc.Balance -= amount;
-            await accountRepo.UpdateAsync(fromAcc);
-
-            // 2. add money
-            var toAcc = await accountRepo.GetByIdAsync(toAccountId);
-            toAcc.Balance += amount;
-            await accountRepo.UpdateAsync(toAcc);
-
-            // 3. write log
-            await logRepo.AddAsync(new TransactionHistory { Amount = amount, Date = DateTime.Now });
-
-            // 4. Confirm data save success
-            await _unitOfWork.CommitAsync();
-        }
-        catch (Exception ex)
-        {
-            // if error (eg: not enough money, server error), ROLLBACK all
-            await _unitOfWork.RollbackAsync();
-            throw new Exception("Transfer failed", ex);
-        }
+            Account = existAccount.Adapt<AccountRs>(),
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            RefreshExpireTime = refreshExpireTime
+        };
     }
-    
-    public async Task GetComplexData()
+
+    public async Task<AuthRs> RefreshAccessToken(RefreshTokenRq request)
     {
-        var repo = _unitOfWork.Repository<Account>();
-        var result = await repo.GetListAsync(
-            predicate: x => x.Status == "Active",
-            include: q => q.Include(x => x.Profile).ThenInclude(p => p.Address),
-            hasTracking: false
-        );
+        var principal = await _tokenService.GetPrincipalFromExpiredTokenAsync(request.AccessToken)
+            ?? throw new BadRequestException("Token invalid.");
+
+        // Extract Id from Tokens
+        var userIdString = principal.Claims.FirstOrDefault(c => c.Type == "Id")?.Value;
+        if (Guid.TryParse(userIdString, out Guid userId) || userId == Guid.Empty)
+            throw new UnauthorizedException("Token don't have valid User Id.");
+
+        // Query account base on id from token
+        var account = await _unitOfWork.GetRepository<Account>().GetOneAsync(u => u.Id == userId);
+
+        // Validate refresh token
+        if (account == null ||
+            account.RefreshToken != request.RefreshToken ||
+            account.RefreshTokenExpirytime <= DateTime.Now)
+        {
+            throw new BadRequestException("Refresh Token is expired or invalid. Please login again.");
+        }
+
+        // Generate new tokens (new refresh token for Rotation - more security if refresh token is leaked)
+        var newAccessToken = _tokenService.GenerateAccessToken(account);
+        var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+        // Keep create new expire time every time AccessToken need refresh
+        // var newRefreshExpireTime = _tokenService.GetExpirationTimes();
+
+        // After certain days -> must login to get new expire
+        var refreshExpireTime = account.RefreshTokenExpirytime ?? _tokenService.GetExpirationTimes();
+
+        // Save refresh token infos
+        account.RefreshToken = newRefreshToken;
+        account.RefreshTokenExpirytime = refreshExpireTime;
+        await _unitOfWork.CompleteAsync();
+
+        return new AuthRs
+        {
+            Account = account.Adapt<AccountRs>(),
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken,
+            RefreshExpireTime = refreshExpireTime
+        };
     }
-    */
 }

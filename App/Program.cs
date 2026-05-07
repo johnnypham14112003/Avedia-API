@@ -53,7 +53,7 @@ app.UseRateLimiter(); // Limit request from an IP/user in a time
 
 //---------------------------
 
-// Check who is login
+// Check who is doing
 app.UseAuthentication();
 
 // Check does user have permission to do an action

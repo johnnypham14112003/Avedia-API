@@ -1,4 +1,4 @@
-﻿namespace BusinessLogic.Models.StrongTyped;
+﻿namespace BusinessLogic.Models.StronglyTyped;
 
 public class JwtSetting
 {
