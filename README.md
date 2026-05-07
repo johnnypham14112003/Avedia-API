@@ -9,12 +9,15 @@
 ## Packages
 ### App Layer
 - [DotNetEnv](https://www.nuget.org/packages/DotNetEnv/3.2.0) `3.2.0` *(For loading env file)*
+- [Microsoft.EntityFrameworkCore.Relational](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Relational/10.0.7) `10.0.7` *(Fix conflict package version with transitive in DataAccess)*
 
 ### BusinessLogic Layer
 - [Microsoft.IdentityModel.Tokens](https://www.nuget.org/packages/Microsoft.IdentityModel.Tokens/8.18.0) `8.18.0` *(For encryption algorithm)*
 - [Microsoft.IdentityModel.JsonWebTokens](https://www.nuget.org/packages/Microsoft.IdentityModel.JsonWebTokens/8.18.0) `8.18.0` *(Creating/Validate JSON Web Token)*
 - [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer/10.0.7) `10.0.7` *(Middleware handle https request, get token from request)*
 - [Mapster](https://www.nuget.org/packages/Mapster/10.0.7) `10.0.7` *(For mapping models)*
+- [Microsoft.EntityFrameworkCore.Relational](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Relational/10.0.7) `10.0.7` *(Fix conflict package version with transitive in DataAccess)*
+- [Microsoft.Extensions.Configuration.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.7) `10.0.7` *(Fix conflict package version with transitive in DataAccess)*
 
 ### DataAccess Layer
 - [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/10.0.1) `10.0.1`

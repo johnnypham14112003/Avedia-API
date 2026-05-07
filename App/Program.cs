@@ -24,6 +24,7 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    // Create summary endpoints default at: localhost.../openapi/v1.json
     app.MapOpenApi();
 }
 
@@ -42,8 +43,8 @@ if (app.Environment.IsDevelopment())
 
 //---------------------------
 
-// Read URL to identify which method
-//app.UseRouting();
+// Read URL to identify which method in controller
+app.UseRouting();
 
 //---------------------------
 

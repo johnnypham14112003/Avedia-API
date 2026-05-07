@@ -1,15 +1,12 @@
 ﻿using BusinessLogic.Extensions.Exceptions;
 using BusinessLogic.Extensions.Utils;
 using BusinessLogic.Interfaces;
-using BusinessLogic.Models.StronglyTyped;
+using BusinessLogic.Models.Generic;
 using BusinessLogic.Models.View.Request;
 using BusinessLogic.Models.View.Response;
 using DataAccess.Interfaces;
 using DataAccess.Models;
 using Mapster;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace BusinessLogic.Services;
 
@@ -18,12 +15,13 @@ public class AccountService : IAccountService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ITokenService _tokenService;
 
-    public AccountService(IUnitOfWork unitOfWork, TokenService tokenService)
+    public AccountService(IUnitOfWork unitOfWork, ITokenService tokenService)
     {
         _unitOfWork = unitOfWork;
         _tokenService = tokenService;
     }
-    public async Task<AuthRs> LoginByPasswordAsync(AuthRq authRequest)
+
+    public async Task<ApiResult<AuthRs>> LoginByPasswordAsync(AuthRq authRequest)
     {
         // Validate email
         if (BoolUtils.IsValidEmail(authRequest.Email) == false)
@@ -48,23 +46,23 @@ public class AccountService : IAccountService
         existAccount.RefreshTokenExpirytime = refreshExpireTime;
         await _unitOfWork.CompleteAsync();
 
-        return new AuthRs
+        return ApiResult<AuthRs>.Ok(new AuthRs
         {
             Account = existAccount.Adapt<AccountRs>(),
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             RefreshExpireTime = refreshExpireTime
-        };
+        });
     }
 
-    public async Task<AuthRs> RefreshAccessToken(RefreshTokenRq request)
+    public async Task<ApiResult<AuthRs>> RefreshAccessToken(RefreshTokenRq request)
     {
         var principal = await _tokenService.GetPrincipalFromExpiredTokenAsync(request.AccessToken)
             ?? throw new BadRequestException("Token invalid.");
 
         // Extract Id from Tokens
         var userIdString = principal.Claims.FirstOrDefault(c => c.Type == "Id")?.Value;
-        if (Guid.TryParse(userIdString, out Guid userId) || userId == Guid.Empty)
+        if (!Guid.TryParse(userIdString, out Guid userId) || userId == Guid.Empty)
             throw new UnauthorizedException("Token don't have valid User Id.");
 
         // Query account base on id from token
@@ -93,12 +91,11 @@ public class AccountService : IAccountService
         account.RefreshTokenExpirytime = refreshExpireTime;
         await _unitOfWork.CompleteAsync();
 
-        return new AuthRs
+        return ApiResult<AuthRs>.Ok(new AuthRs
         {
-            Account = account.Adapt<AccountRs>(),
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken,
             RefreshExpireTime = refreshExpireTime
-        };
+        });
     }
 }

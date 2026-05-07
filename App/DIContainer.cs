@@ -24,6 +24,7 @@ public static class DIContainer
         InjectRepositoryClasses(services);
 
         ConfigJWTAuth(services, configuration);
+        ConfigControllerRoute(services);
         ConfigJsonOption(services);
         ConfigCORS(services);
 
@@ -152,6 +153,10 @@ public static class DIContainer
 
         // Config Authorization
         return services.AddAuthorization();
+    }
+    private static IServiceCollection ConfigControllerRoute(IServiceCollection services)
+    {
+        return services.AddRouting(options => options.LowercaseUrls = true);
     }
 
     /// <summary>
