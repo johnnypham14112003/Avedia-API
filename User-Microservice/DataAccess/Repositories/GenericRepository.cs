@@ -19,8 +19,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     //=============================================
     public bool HasChanges(T newEntity, T trackedEntity) =>
         typeof(T).GetProperties().Any(prop => !Equals(prop.GetValue(trackedEntity), prop.GetValue(newEntity)));
-    public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression) => await _dbSet.AnyAsync(expression);
-    public async Task<int> CountAsync(Expression<Func<T, bool>> expression) => await _dbSet.CountAsync(expression);
+    public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression) => await _dbSet.AsNoTracking().AnyAsync(expression);
+    public async Task<int> CountAsync(Expression<Func<T, bool>> expression) => await _dbSet.AsNoTracking().CountAsync(expression);
 
     public async Task<List<T>?> GetListAsync(
         Expression<Func<T, bool>> predicate,
@@ -45,12 +45,9 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task<IEnumerable<T>> GetPagedAsync(
         int pageNumber, int pageSize,
         Expression<Func<T, bool>>? predicate = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         Func<IQueryable<T>, IQueryable<T>>? include = null)
     {
         var query = BuildQuery(predicate, include, hasTracking: false);
-
-        if (orderBy != null) query = orderBy(query);
 
         pageNumber = pageNumber < 1 ? 1 : pageNumber;
         pageSize = pageSize < 1 ? 10 : pageSize;
