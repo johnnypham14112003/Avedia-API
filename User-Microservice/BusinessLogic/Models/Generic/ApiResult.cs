@@ -43,4 +43,6 @@ public class ApiResult<T>//Not delcare T as class for more purpose return like b
     /// <returns>ApiResult (wrapper for json body response)</returns>
     public static ApiResult<T> Created(T data, string message = "Created successfully")
         => new() { StatusCode = StatusCodes.Status201Created, Message = message, Data = data };
+    public static ApiResult<T> Failure(T data, string message = "Failed")
+        => new() { StatusCode = StatusCodes.Status422UnprocessableEntity, Message = message, Data = data };
 }

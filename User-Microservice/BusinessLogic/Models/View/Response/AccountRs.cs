@@ -23,4 +23,5 @@ public class AccountRs
     public string Role { get; set; } = null!;
 
     public string Status { get; set; } = null!;
+    public virtual ICollection<AccountBadgeRs>? AccountBadges { get; set; }
 }

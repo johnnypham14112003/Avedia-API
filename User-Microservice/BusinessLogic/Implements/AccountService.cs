@@ -9,6 +9,8 @@ using DataAccess.Interfaces;
 using DataAccess.Models;
 using LinqKit;
 using Mapster;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Implements;
 
@@ -102,6 +104,43 @@ public class AccountService : IAccountService
         });
     }
 
+    public async Task<ApiResult<bool>> RevokeRefreshTokenAsync(Guid accountId)
+    {
+        var account = await _unitOfWork.GetRepository<Account>().GetByIdAsync(accountId);
+        if (account != null)
+        {
+            account.RefreshToken = null;
+            account.RefreshTokenExpirytime = null;
+        }
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
+    }
+
+    public async Task<ApiResult<bool>> ResetPasswordAsync(Account? alreadyQueried, Guid accountId, string newPassword)
+    {
+        var hashedPassword = StringUtils.HashPassword(newPassword);
+        if (alreadyQueried is null)
+        {
+            var account = await _unitOfWork.GetRepository<Account>().GetByIdAsync(accountId)
+                ?? throw new NotFoundException("Account not found!");
+
+            // Update for new queried account
+            account.PasswordHash = hashedPassword;
+            account.RefreshToken = null;
+            account.RefreshTokenExpirytime = null;
+        }
+        else
+        {
+            // Update for queried account from params
+            alreadyQueried.PasswordHash = hashedPassword;
+            alreadyQueried.RefreshToken = null;
+            alreadyQueried.RefreshTokenExpirytime = null;
+        }
+
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
+    }
+
     // ----------------------------< CRUD >----------------------------
     public async Task<ApiResult<bool>> CreateAccountAsync(AuthRq request)
     {
@@ -119,20 +158,27 @@ public class AccountService : IAccountService
             Email = request.Email,
             PasswordHash = StringUtils.HashPassword(request.Password),
         });
-        await _unitOfWork.CompleteAsync();
 
-        return ApiResult<bool>.Created(true);
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
     }
 
-    public async Task<ApiResult<AccountRs>> GetAccountByIdAsync(Guid id)
+    public async Task<ApiResult<AccountRs>> GetAccountAsync(Guid id, bool includeBadge = false)
     {
-        var account = await _unitOfWork.GetRepository<Account>().GetByIdAsync(id)
-            ?? throw new NotFoundException("Not found this account match id!");
+        var account = (includeBadge == false)
+            ? await _unitOfWork.GetRepository<Account>().GetByIdAsync(id)
+            : await _unitOfWork.GetRepository<Account>().GetOneAsync(
+                a => a.Id == id,
+                q => q.Include(a => a.AccountBadges).ThenInclude(ab => ab.Badge),
+                hasTracking: false
+            );
 
-        return ApiResult<AccountRs>.Ok(account.Adapt<AccountRs>());
+        return (account is null)
+            ? throw new NotFoundException("Not found this account match id!")
+            : ApiResult<AccountRs>.Ok(account.Adapt<AccountRs>());
     }
 
-    public async Task<ApiResult<IEnumerable<AccountRs>>> GetAccountsAsync(PagingQueryRq<AccountQr> input)
+    public async Task<ApiResult<PagedResult<AccountRs>>> GetAccountsPageAsync(PagingQueryRq<AccountQr> input)
     {
         // Query form builder
         var predicate = PredicateBuilder.New<Account>(true);
@@ -140,58 +186,103 @@ public class AccountService : IAccountService
         // ------------------------------------------
         if (!string.IsNullOrWhiteSpace(input.Keyword))
         {
-            predicate = predicate.And(q => q.UserName.Contains(input.Keyword, StringComparison.OrdinalIgnoreCase));
-            predicate = predicate.And(q => q.UserName.Contains(input.Keyword, StringComparison.OrdinalIgnoreCase));
+            predicate = predicate.And(a => a.UserName.Contains(input.Keyword));
+            predicate = predicate.And(a => a.Email.Contains(input.Keyword));
         }
 
-        var accounts = await _unitOfWork.GetRepository<Account>().GetPagedAsync(
-            predicate: predicate,
-            pageNumber: input.PageNumber,
-            pageSize: input.PageSize,
-            orderBy: q => q.OrderByDescending(a => a.UserName)
-        );
+        if (input.AdvanceInput is not null)
+        {
+            // IsVerified
+            if (input.AdvanceInput.IsVerified.HasValue)
+                predicate = predicate.And(a => a.IsVerified == input.AdvanceInput.IsVerified);
 
-        return ApiResult<IEnumerable<AccountRs>>.Ok(accounts.Adapt<IEnumerable<AccountRs>>());
+            // Gender
+            switch (input.AdvanceInput.Gender)
+            {
+                case 0:
+                    predicate = predicate.And(a => a.Gender == false);
+                    break;
+                case 1:
+                    predicate = predicate.And(a => a.Gender == true);
+                    break;
+                case 2:
+                    predicate = predicate.And(a => a.Gender == null);
+                    break;
+            }
+
+            // Nationality
+            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Nationality))
+                predicate = predicate.And(a => a.Nationality!.Equals(input.AdvanceInput.Nationality));
+
+            // JoinedDate
+            if (input.AdvanceInput.FromDate.HasValue)
+                predicate = predicate.And(a => a.JoinedDate >= input.AdvanceInput.FromDate);
+            if (input.AdvanceInput.ToDate.HasValue)
+                predicate = predicate.And(a => a.JoinedDate < input.AdvanceInput.ToDate.Value.AddDays(1));
+
+            // Role
+            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Role))
+                predicate = predicate.And(a => a.Role.Equals(input.AdvanceInput.Role));
+
+            // Status
+            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Status))
+                predicate = predicate.And(a => a.Status.Equals(input.AdvanceInput.Status));
+        }
+        // ------------------------------------------
+        var accountRepo = _unitOfWork.GetRepository<Account>();
+        var accounts = (
+            await accountRepo.GetPagedAsync(
+                predicate: predicate,
+                pageNumber: input.PageNumber,
+                pageSize: input.PageSize)
+            ).Adapt<IEnumerable<AccountRs>>();
+
+        return ApiResult<PagedResult<AccountRs>>.Ok(
+            new PagedResult<AccountRs>
+            {
+                TotalCount = await accountRepo.CountAsync(x => true),
+                PageSize = input.PageSize,
+                PageIndex = input.PageNumber,
+                DataList = accounts
+            });
     }
 
-    public async Task<ApiResult<AccountRs>> UpdateAccountAsync(Guid id, AccountRq request)
+    public async Task<ApiResult<bool>> UpdateAccountAsync(AccountRq request, bool updateAll = true)
     {
         var accountRepo = _unitOfWork.GetRepository<Account>();
 
-        // 1. Lấy thông tin tài khoản (có tracking để update)
-        var existAccount = await accountRepo.GetOneAsync(a => a.Id == id, hasTracking: true);
+        var existAccount = await accountRepo.GetOneAsync(a => a.Id == request.Id, hasTracking: true)
+            ?? throw new NotFoundException("Not found this Id account!");
 
-        if (existAccount == null)
-            throw new BadRequestException("Không tìm thấy tài khoản để cập nhật!");
+        var temp = existAccount;
 
-        // 2. Cập nhật các trường được phép thay đổi
-        // Có thể dùng Mapster để map trực tiếp: request.Adapt(existAccount);
-        // Hoặc gán tay để kiểm soát chặt chẽ:
-        existAccount.UserName = request.UserName ?? existAccount.UserName;
-        existAccount.AvatarUrl = request.AvatarUrl ?? existAccount.AvatarUrl;
-        existAccount.Gender = request.Gender ?? existAccount.Gender;
-        existAccount.Nationality = request.Nationality ?? existAccount.Nationality;
+        // Update All
+        request.Adapt(existAccount);
 
-        await accountRepo.UpdateAsync(existAccount);
-        await _unitOfWork.CompleteAsync();
+        // If not update all, keep field that user can't edit
+        if (updateAll == false)
+        {
+            existAccount.IsVerified = temp.IsVerified;
+            existAccount.JoinedDate = temp.JoinedDate;
+            existAccount.MeritPoint = temp.MeritPoint;
+            existAccount.Role = temp.Role;
+        }
 
-        return ApiResult<AccountRs>.Ok(existAccount.Adapt<AccountRs>());
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ApiResult<bool>.Ok(true) : ApiResult<bool>.Failure(false);
     }
 
     public async Task<ApiResult<bool>> DeleteAccountAsync(Guid id)
     {
         var accountRepo = _unitOfWork.GetRepository<Account>();
 
-        var existAccount = await accountRepo.GetByIdAsync(id);
-        if (existAccount == null)
-            throw new BadRequestException("Không tìm thấy tài khoản cần xóa!");
+        var existAccount = await accountRepo.GetByIdAsync(id)
+            ?? throw new NotFoundException("Not found this Id account!");
 
         // Soft delete
         existAccount.Status = "Deleted";
-        await accountRepo.UpdateAsync(existAccount);
 
-        await _unitOfWork.CompleteAsync();
-
-        return ApiResult<bool>.Ok(true);
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
     }
 }
