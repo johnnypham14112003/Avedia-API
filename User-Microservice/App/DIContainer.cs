@@ -1,6 +1,6 @@
-﻿using BusinessLogic.Interfaces;
+﻿using BusinessLogic.Implements;
+using BusinessLogic.Interfaces;
 using BusinessLogic.Models.StronglyTyped;
-using BusinessLogic.Services;
 using DataAccess;
 using DataAccess.Interfaces;
 using DataAccess.Repositories;

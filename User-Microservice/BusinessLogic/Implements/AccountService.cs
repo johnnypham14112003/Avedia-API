@@ -3,12 +3,14 @@ using BusinessLogic.Extensions.Utils;
 using BusinessLogic.Interfaces;
 using BusinessLogic.Models.Generic;
 using BusinessLogic.Models.View.Request;
+using BusinessLogic.Models.View.Request.Query;
 using BusinessLogic.Models.View.Response;
 using DataAccess.Interfaces;
 using DataAccess.Models;
+using LinqKit;
 using Mapster;
 
-namespace BusinessLogic.Services;
+namespace BusinessLogic.Implements;
 
 public class AccountService : IAccountService
 {
@@ -21,6 +23,7 @@ public class AccountService : IAccountService
         _tokenService = tokenService;
     }
 
+    // ===========================< METHODS >===========================
     public async Task<ApiResult<AuthRs>> LoginByPasswordAsync(AuthRq authRequest)
     {
         // Validate email
@@ -97,5 +100,98 @@ public class AccountService : IAccountService
             RefreshToken = newRefreshToken,
             RefreshExpireTime = refreshExpireTime
         });
+    }
+
+    // ----------------------------< CRUD >----------------------------
+    public async Task<ApiResult<bool>> CreateAccountAsync(AuthRq request)
+    {
+        var accountRepo = _unitOfWork.GetRepository<Account>();
+
+        // 1. Validate exist mail
+        bool isEmailExist = await accountRepo.AnyAsync(a => a.Email.ToLower() == request.Email.ToLower());
+        if (isEmailExist)
+            throw new ConflictException("This email already been used!");
+
+        // 2. Add default to Database
+        await accountRepo.AddAsync(new Account
+        {
+            UserName = StringUtils.GetUsername(request.Email),
+            Email = request.Email,
+            PasswordHash = StringUtils.HashPassword(request.Password),
+        });
+        await _unitOfWork.CompleteAsync();
+
+        return ApiResult<bool>.Created(true);
+    }
+
+    public async Task<ApiResult<AccountRs>> GetAccountByIdAsync(Guid id)
+    {
+        var account = await _unitOfWork.GetRepository<Account>().GetByIdAsync(id)
+            ?? throw new NotFoundException("Not found this account match id!");
+
+        return ApiResult<AccountRs>.Ok(account.Adapt<AccountRs>());
+    }
+
+    public async Task<ApiResult<IEnumerable<AccountRs>>> GetAccountsAsync(PagingQueryRq<AccountQr> input)
+    {
+        // Query form builder
+        var predicate = PredicateBuilder.New<Account>(true);
+
+        // ------------------------------------------
+        if (!string.IsNullOrWhiteSpace(input.Keyword))
+        {
+            predicate = predicate.And(q => q.UserName.Contains(input.Keyword, StringComparison.OrdinalIgnoreCase));
+            predicate = predicate.And(q => q.UserName.Contains(input.Keyword, StringComparison.OrdinalIgnoreCase));
+        }
+
+        var accounts = await _unitOfWork.GetRepository<Account>().GetPagedAsync(
+            predicate: predicate,
+            pageNumber: input.PageNumber,
+            pageSize: input.PageSize,
+            orderBy: q => q.OrderByDescending(a => a.UserName)
+        );
+
+        return ApiResult<IEnumerable<AccountRs>>.Ok(accounts.Adapt<IEnumerable<AccountRs>>());
+    }
+
+    public async Task<ApiResult<AccountRs>> UpdateAccountAsync(Guid id, AccountRq request)
+    {
+        var accountRepo = _unitOfWork.GetRepository<Account>();
+
+        // 1. Lấy thông tin tài khoản (có tracking để update)
+        var existAccount = await accountRepo.GetOneAsync(a => a.Id == id, hasTracking: true);
+
+        if (existAccount == null)
+            throw new BadRequestException("Không tìm thấy tài khoản để cập nhật!");
+
+        // 2. Cập nhật các trường được phép thay đổi
+        // Có thể dùng Mapster để map trực tiếp: request.Adapt(existAccount);
+        // Hoặc gán tay để kiểm soát chặt chẽ:
+        existAccount.UserName = request.UserName ?? existAccount.UserName;
+        existAccount.AvatarUrl = request.AvatarUrl ?? existAccount.AvatarUrl;
+        existAccount.Gender = request.Gender ?? existAccount.Gender;
+        existAccount.Nationality = request.Nationality ?? existAccount.Nationality;
+
+        await accountRepo.UpdateAsync(existAccount);
+        await _unitOfWork.CompleteAsync();
+
+        return ApiResult<AccountRs>.Ok(existAccount.Adapt<AccountRs>());
+    }
+
+    public async Task<ApiResult<bool>> DeleteAccountAsync(Guid id)
+    {
+        var accountRepo = _unitOfWork.GetRepository<Account>();
+
+        var existAccount = await accountRepo.GetByIdAsync(id);
+        if (existAccount == null)
+            throw new BadRequestException("Không tìm thấy tài khoản cần xóa!");
+
+        // Soft delete
+        existAccount.Status = "Deleted";
+        await accountRepo.UpdateAsync(existAccount);
+
+        await _unitOfWork.CompleteAsync();
+
+        return ApiResult<bool>.Ok(true);
     }
 }

@@ -11,7 +11,7 @@ public partial class Favorite
 
     public string TargetType { get; set; } = null!;
 
-    public Guid? TargetId { get; set; }
+    public Guid TargetId { get; set; }
 
     public virtual Account Lover { get; set; } = null!;
 }

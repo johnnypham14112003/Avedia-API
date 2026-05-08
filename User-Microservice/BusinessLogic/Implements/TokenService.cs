@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BusinessLogic.Services;
+namespace BusinessLogic.Implements;
 
 public class TokenService(JwtSetting jwtSetting) : ITokenService
 {
