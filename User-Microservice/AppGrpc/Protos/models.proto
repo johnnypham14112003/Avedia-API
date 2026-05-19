@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+option csharp_namespace = "AppGrpc.Protos";
+
+package user_service;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+// This proto file is created to help mapping nested model message from actual model data return (Circular Import)
+message ResultResponse {
+    bool success = 1;
+    google.protobuf.StringValue error_message = 2;
+    int32 error_code = 3;
+}
+
+/* - If a composite model has value that need to return, then declare it here and use it.
+   - Otherwise, declare list<object model> directly instead of the <composite object> */
+message AccountInfo {
+    string id = 1;
+    google.protobuf.StringValue avatar_url = 2;
+    google.protobuf.StringValue otp_code = 3;
+    google.protobuf.StringValue refresh_token = 4;
+    google.protobuf.Timestamp refresh_token_expirytime = 5;
+    string password_hash = 6;
+    string user_name = 7;
+    string email = 8;
+    bool is_verified = 9;
+    google.protobuf.BoolValue gender = 10;
+    google.protobuf.StringValue nationality = 11;
+    google.protobuf.Timestamp joined_date = 12;
+    int32 merit_point = 13;
+    string role = 14;
+    string status = 15;
+}
+
+message BadgeInfo {
+    string id = 1;
+    string title = 2;
+    google.protobuf.StringValue description = 3;
+    google.protobuf.StringValue icon_url = 4;
+    google.protobuf.StringValue locale_path = 5;
+    int32 rare_level = 6;
+    google.protobuf.Timestamp created_date = 7;
+    string status = 8;
+}
+
+message AccountBadgeInfo {
+    string account_id = 1;
+    string badge_id = 2;
+    google.protobuf.Timestamp awarded_date = 3;
+}
+
+message NotificationInfo {
+    string id = 1;
+    google.protobuf.StringValue type = 2;
+    google.protobuf.StringValue type_id = 3;
+    string title = 4;
+    google.protobuf.StringValue message = 5;
+    bool is_global = 6;
+    google.protobuf.Timestamp created_date = 7;
+}
+
+message AccountNotificationInfo {
+    string account_id = 1;
+    string notification_id = 2;
+    bool is_read = 3;
+    google.protobuf.Timestamp created_date = 4;
+}
+
+message ContributionInfo {
+    string id = 1;
+    string contributor_id = 2;
+    google.protobuf.StringValue approver_id = 3;
+    bool admin_reviewed = 4;
+    string target_type = 5;
+    google.protobuf.StringValue target_id = 6;
+    string action_type = 7;
+    google.protobuf.Timestamp requested_date = 8; 
+    google.protobuf.StringValue proposed_data = 9;
+    string status = 10;
+}
+
+message FavoriteInfo {
+    string id = 1;
+    string lover_id = 2;
+    string target_type = 3;
+    string target_id = 4;
+}

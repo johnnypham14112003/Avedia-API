@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option csharp_namespace = "AppGrpc.Protos";
+
+package user_service;
+
+import "Protos/models.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+service AccountGrpcService {
+    rpc GetByPasswordAsync (AuthRequest) returns (AccountResponse);
+    rpc GetNewRefreshToken (TokenRequest) returns (AccountResponse);
+    rpc RevokeRefreshTokenAsync (AccountGetter) returns (AccountResponse);
+    rpc ChangePasswordAsync (AuthRequest) returns (AccountResponse);
+	rpc CreateAccountAsync (AuthRequest) returns (AccountResponse);
+    rpc GetAccountAsync (AccountGetter) returns (AccountResponse);
+    rpc UpdateAccountAsync (AccountRequest) returns (AccountResponse);
+    rpc DeleteAccountAsync (AccountGetter) returns (AccountResponse);
+}
+
+// ------ Request
+message AccountRequest {
+    AccountInfo account_info = 1;
+
+    bool update_all = 2;
+}
+
+message AccountGetter {
+    string id = 1;
+    bool include_badge = 2;
+}
+
+message TokenRequest {
+    string account_id = 1;
+    google.protobuf.StringValue refresh_token = 2;
+}
+
+message AuthRequest {
+    string email = 1;
+    string password = 2;
+}
+
+// ------ Response
+message AccountResponse {
+    ResultResponse result_response = 1;
+
+    // Below is optional return (can be nullable)
+    AccountInfo account_info = 2;
+    message AccountBadgeResponse {
+        AccountBadgeInfo account_badge_info = 1;
+        BadgeInfo badge_info = 2;
+    }
+
+    repeated AccountBadgeResponse account_badge_response = 3;
+}

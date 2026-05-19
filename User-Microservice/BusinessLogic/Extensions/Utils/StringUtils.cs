@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 
 namespace BusinessLogic.Extensions.Utils;
 
@@ -66,5 +65,13 @@ public static class StringUtils
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
         return RandomNumberGenerator.GetString("0123456789", length);
+    }
+
+    public static string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }

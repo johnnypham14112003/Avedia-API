@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.80.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <Protobuf Include="Protos\models.proto" GrpcServices="none" />
+	  <Protobuf Include="Protos\account.proto" GrpcServices="Server" />
+	  <Protobuf Include="Protos\badge.proto" GrpcServices="Server" />
+	  <Protobuf Include="Protos\contribution.proto" GrpcServices="Server" />
+	  <Protobuf Include="Protos\favorite.proto" GrpcServices="Server" />
+	  <Protobuf Include="Protos\notification.proto" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
+  </ItemGroup>
+
+</Project>

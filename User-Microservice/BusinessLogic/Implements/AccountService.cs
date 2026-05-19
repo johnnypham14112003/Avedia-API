@@ -1,110 +1,71 @@
-﻿using BusinessLogic.Extensions.Exceptions;
+﻿using BusinessLogic.DTOs.Messages;
+using BusinessLogic.DTOs.Messages.Request;
+using BusinessLogic.DTOs.Messages.Response;
 using BusinessLogic.Extensions.Utils;
 using BusinessLogic.Interfaces;
-using BusinessLogic.Models.Generic;
-using BusinessLogic.Models.View.Request;
-using BusinessLogic.Models.View.Request.Query;
-using BusinessLogic.Models.View.Response;
 using DataAccess.Interfaces;
 using DataAccess.Models;
-using LinqKit;
 using Mapster;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Implements;
 
-public class AccountService : IAccountService
+public class AccountService(IUnitOfWork unitOfWork) : IAccountService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ITokenService _tokenService;
-
-    public AccountService(IUnitOfWork unitOfWork, ITokenService tokenService)
-    {
-        _unitOfWork = unitOfWork;
-        _tokenService = tokenService;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     // ===========================< METHODS >===========================
-    public async Task<ApiResult<AuthRs>> LoginByPasswordAsync(AuthRq authRequest)
+    /// <summary>
+    ///     This method is similar to login but instead of handling access token, it will just handle refresh token
+    /// </summary>
+    public async Task<ResultRs<AccountRs>> GetByPasswordAsync(AuthRq authRequest)
     {
         // Validate email
         if (BoolUtils.IsValidEmail(authRequest.Email) == false)
-            throw new BadRequestException("Invalid Email Format!");
+            return ResultRs<AccountRs>.Failure("Invalid Email Format!");
 
         // Check account in database
         var existAccount = await _unitOfWork.GetRepository<Account>().GetOneAsync(
-            acc => acc.Email.ToLower().Equals(authRequest.Email.ToLower()));
+            acc => acc.Email.Equals(authRequest.Email));
 
         // Validate password with hashed password using custom method for security
-        if (existAccount == null ||
-            BoolUtils.VerifyPassword(authRequest.Password, existAccount.PasswordHash) == false)
-            throw new BadRequestException("Invalid email or password!");
+        if (existAccount == null || BoolUtils.VerifyPassword(authRequest.Password, existAccount.PasswordHash) == false)
+            return ResultRs<AccountRs>.Failure("Invalid email or password!");
 
-        // Generate tokens
-        var accessToken = _tokenService.GenerateAccessToken(existAccount);
-        var refreshToken = _tokenService.GenerateRefreshToken();
-        var refreshExpireTime = _tokenService.GetExpirationTimes();
+        // Call helper to generate new refresh token and time
+        var (token, time) = GenerateNewRefreshToken();
 
-        // Save refresh token infos
-        existAccount.RefreshToken = refreshToken;
-        existAccount.RefreshTokenExpirytime = refreshExpireTime;
-        await _unitOfWork.CompleteAsync();
+        existAccount.RefreshToken = token;
+        existAccount.RefreshTokenExpirytime = time;
 
-        return ApiResult<AuthRs>.Ok(new AuthRs
-        {
-            Account = existAccount.Adapt<AccountRs>(),
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            RefreshExpireTime = refreshExpireTime
-        });
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ResultRs<AccountRs>.Ok(existAccount.Adapt<AccountRs>()) : ResultRs<AccountRs>.Failure();
     }
 
-    public async Task<ApiResult<AuthRs>> RefreshAccessToken(RefreshTokenRq request)
+    public async Task<ResultRs<AccountRs>> RefreshTokenAsync(Guid id, string refreshToken)
     {
-        var principal = await _tokenService.GetPrincipalFromExpiredTokenAsync(request.AccessToken)
-            ?? throw new BadRequestException("Token invalid.");
+        var account = await _unitOfWork.GetRepository<Account>().GetOneAsync(u => u.Id == id);
 
-        // Extract Id from Tokens
-        var userIdString = principal.Claims.FirstOrDefault(c => c.Type == "Id")?.Value;
-        if (!Guid.TryParse(userIdString, out Guid userId) || userId == Guid.Empty)
-            throw new UnauthorizedException("Token don't have valid User Id.");
-
-        // Query account base on id from token
-        var account = await _unitOfWork.GetRepository<Account>().GetOneAsync(u => u.Id == userId);
-
-        // Validate refresh token
-        if (account == null ||
-            account.RefreshToken != request.RefreshToken ||
+        // Validate for refreshing expired access token
+        if (account is null ||
+            account.RefreshToken != refreshToken ||
             account.RefreshTokenExpirytime <= DateTime.Now)
         {
-            throw new BadRequestException("Refresh Token is expired or invalid. Please login again.");
+            ResultRs<AccountRs>.BadRequest("Refresh Token is expired or invalid. Please login again.");
         }
 
-        // Generate new tokens (new refresh token for Rotation - more security if refresh token is leaked)
-        var newAccessToken = _tokenService.GenerateAccessToken(account);
-        var newRefreshToken = _tokenService.GenerateRefreshToken();
+        // Call helper to generate new refresh token and time
+        var (token, time) = GenerateNewRefreshToken();
 
-        // Keep create new expire time every time AccessToken need refresh
-        // var newRefreshExpireTime = _tokenService.GetExpirationTimes();
+        // Generate new refresh token info
+        account!.RefreshToken = token;
+        account.RefreshTokenExpirytime = account!.RefreshTokenExpirytime ?? time;// After expire days -> must login to get new expire
 
-        // After certain days -> must login to get new expire
-        var refreshExpireTime = account.RefreshTokenExpirytime ?? _tokenService.GetExpirationTimes();
-
-        // Save refresh token infos
-        account.RefreshToken = newRefreshToken;
-        account.RefreshTokenExpirytime = refreshExpireTime;
-        await _unitOfWork.CompleteAsync();
-
-        return ApiResult<AuthRs>.Ok(new AuthRs
-        {
-            AccessToken = newAccessToken,
-            RefreshToken = newRefreshToken,
-            RefreshExpireTime = refreshExpireTime
-        });
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ResultRs<AccountRs>.Ok(account.Adapt<AccountRs>()) : ResultRs<AccountRs>.Failure();
     }
 
-    public async Task<ApiResult<bool>> RevokeRefreshTokenAsync(Guid accountId)
+    public async Task<ResultRs<bool>> RevokeRefreshTokenAsync(Guid accountId)
     {
         var account = await _unitOfWork.GetRepository<Account>().GetByIdAsync(accountId);
         if (account != null)
@@ -113,43 +74,33 @@ public class AccountService : IAccountService
             account.RefreshTokenExpirytime = null;
         }
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
+            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
     }
 
-    public async Task<ApiResult<bool>> ResetPasswordAsync(Account? alreadyQueried, Guid accountId, string newPassword)
+    public async Task<ResultRs<bool>> ChangePasswordAsync(string email, string newPassword)
     {
-        var hashedPassword = StringUtils.HashPassword(newPassword);
-        if (alreadyQueried is null)
-        {
-            var account = await _unitOfWork.GetRepository<Account>().GetByIdAsync(accountId)
-                ?? throw new NotFoundException("Account not found!");
+        var account = await _unitOfWork.GetRepository<Account>().GetOneAsync(acc => acc.Email.Equals(email));
+        if (account == null)
+            return ResultRs<bool>.NotFound("Account not found!");
 
-            // Update for new queried account
-            account.PasswordHash = hashedPassword;
-            account.RefreshToken = null;
-            account.RefreshTokenExpirytime = null;
-        }
-        else
-        {
-            // Update for queried account from params
-            alreadyQueried.PasswordHash = hashedPassword;
-            alreadyQueried.RefreshToken = null;
-            alreadyQueried.RefreshTokenExpirytime = null;
-        }
+        // Update for new queried account
+        account.PasswordHash = StringUtils.HashPassword(newPassword);
+        account.RefreshToken = null;
+        account.RefreshTokenExpirytime = null;
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
+            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
     }
 
     // ----------------------------< CRUD >----------------------------
-    public async Task<ApiResult<bool>> CreateAccountAsync(AuthRq request)
+    public async Task<ResultRs<bool>> CreateAccountAsync(AuthRq request)
     {
         var accountRepo = _unitOfWork.GetRepository<Account>();
 
         // 1. Validate exist mail
         bool isEmailExist = await accountRepo.AnyAsync(a => a.Email.ToLower() == request.Email.ToLower());
         if (isEmailExist)
-            throw new ConflictException("This email already been used!");
+            return ResultRs<bool>.Conflict("This email already been used!");
 
         // 2. Add default to Database
         await accountRepo.AddAsync(new Account
@@ -160,10 +111,10 @@ public class AccountService : IAccountService
         });
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
+            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
     }
 
-    public async Task<ApiResult<AccountRs>> GetAccountAsync(Guid id, bool includeBadge = false)
+    public async Task<ResultRs<AccountRs>> GetAccountAsync(Guid id, bool includeBadge = false)
     {
         var account = (includeBadge == false)
             ? await _unitOfWork.GetRepository<Account>().GetByIdAsync(id)
@@ -173,86 +124,87 @@ public class AccountService : IAccountService
                 hasTracking: false
             );
 
-        return (account is null)
-            ? throw new NotFoundException("Not found this account match id!")
-            : ApiResult<AccountRs>.Ok(account.Adapt<AccountRs>());
+        if (account is null) return ResultRs<AccountRs>.NotFound("Not found this account match id!");
+
+        return ResultRs<AccountRs>.Ok(account.Adapt<AccountRs>());
     }
 
-    public async Task<ApiResult<PagedResult<AccountRs>>> GetAccountsPageAsync(PagingQueryRq<AccountQr> input)
+    //public async Task<PagedResult<AccountRs>> GetAccountsPageAsync(PagingQueryRq<AccountQr> input)
+    //{
+    //    // Query form builder
+    //    var predicate = PredicateBuilder.New<Account>(true);
+
+    //    // ------------------------------------------
+    //    if (!string.IsNullOrWhiteSpace(input.Keyword))
+    //    {
+    //        predicate = predicate.And(a => a.UserName.Contains(input.Keyword));
+    //        predicate = predicate.And(a => a.Email.Contains(input.Keyword));
+    //    }
+
+    //    if (input.AdvanceInput is not null)
+    //    {
+    //        // IsVerified
+    //        if (input.AdvanceInput.IsVerified.HasValue)
+    //            predicate = predicate.And(a => a.IsVerified == input.AdvanceInput.IsVerified);
+
+    //        // Gender
+    //        switch (input.AdvanceInput.Gender)
+    //        {
+    //            case 0:
+    //                predicate = predicate.And(a => a.Gender == false);
+    //                break;
+    //            case 1:
+    //                predicate = predicate.And(a => a.Gender == true);
+    //                break;
+    //            case 2:
+    //                predicate = predicate.And(a => a.Gender == null);
+    //                break;
+    //        }
+
+    //        // Nationality
+    //        if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Nationality))
+    //            predicate = predicate.And(a => a.Nationality!.Equals(input.AdvanceInput.Nationality));
+
+    //        // JoinedDate
+    //        if (input.AdvanceInput.FromDate.HasValue)
+    //            predicate = predicate.And(a => a.JoinedDate >= input.AdvanceInput.FromDate);
+    //        if (input.AdvanceInput.ToDate.HasValue)
+    //            predicate = predicate.And(a => a.JoinedDate < input.AdvanceInput.ToDate.Value.AddDays(1));
+
+    //        // Role
+    //        if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Role))
+    //            predicate = predicate.And(a => a.Role.Equals(input.AdvanceInput.Role));
+
+    //        // Status
+    //        if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Status))
+    //            predicate = predicate.And(a => a.Status.Equals(input.AdvanceInput.Status));
+    //    }
+    //    // ------------------------------------------
+    //    var accountRepo = _unitOfWork.GetRepository<Account>();
+    //    var accounts = (
+    //        await accountRepo.GetPagedAsync(
+    //            predicate: predicate,
+    //            pageNumber: input.PageNumber,
+    //            pageSize: input.PageSize)
+    //        ).Adapt<IEnumerable<AccountRs>>();
+
+    //    return PagedResult<AccountRs>.Ok(
+    //        new PagedResult<AccountRs>
+    //        {
+    //            TotalCount = await accountRepo.CountAsync(x => true),
+    //            PageSize = input.PageSize,
+    //            PageIndex = input.PageNumber,
+    //            DataList = accounts
+    //        });
+    //}
+
+    public async Task<ResultRs<bool>> UpdateAccountAsync(AccountRq request, bool updateAll = true)
     {
-        // Query form builder
-        var predicate = PredicateBuilder.New<Account>(true);
-
-        // ------------------------------------------
-        if (!string.IsNullOrWhiteSpace(input.Keyword))
-        {
-            predicate = predicate.And(a => a.UserName.Contains(input.Keyword));
-            predicate = predicate.And(a => a.Email.Contains(input.Keyword));
-        }
-
-        if (input.AdvanceInput is not null)
-        {
-            // IsVerified
-            if (input.AdvanceInput.IsVerified.HasValue)
-                predicate = predicate.And(a => a.IsVerified == input.AdvanceInput.IsVerified);
-
-            // Gender
-            switch (input.AdvanceInput.Gender)
-            {
-                case 0:
-                    predicate = predicate.And(a => a.Gender == false);
-                    break;
-                case 1:
-                    predicate = predicate.And(a => a.Gender == true);
-                    break;
-                case 2:
-                    predicate = predicate.And(a => a.Gender == null);
-                    break;
-            }
-
-            // Nationality
-            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Nationality))
-                predicate = predicate.And(a => a.Nationality!.Equals(input.AdvanceInput.Nationality));
-
-            // JoinedDate
-            if (input.AdvanceInput.FromDate.HasValue)
-                predicate = predicate.And(a => a.JoinedDate >= input.AdvanceInput.FromDate);
-            if (input.AdvanceInput.ToDate.HasValue)
-                predicate = predicate.And(a => a.JoinedDate < input.AdvanceInput.ToDate.Value.AddDays(1));
-
-            // Role
-            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Role))
-                predicate = predicate.And(a => a.Role.Equals(input.AdvanceInput.Role));
-
-            // Status
-            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Status))
-                predicate = predicate.And(a => a.Status.Equals(input.AdvanceInput.Status));
-        }
-        // ------------------------------------------
-        var accountRepo = _unitOfWork.GetRepository<Account>();
-        var accounts = (
-            await accountRepo.GetPagedAsync(
-                predicate: predicate,
-                pageNumber: input.PageNumber,
-                pageSize: input.PageSize)
-            ).Adapt<IEnumerable<AccountRs>>();
-
-        return ApiResult<PagedResult<AccountRs>>.Ok(
-            new PagedResult<AccountRs>
-            {
-                TotalCount = await accountRepo.CountAsync(x => true),
-                PageSize = input.PageSize,
-                PageIndex = input.PageNumber,
-                DataList = accounts
-            });
-    }
-
-    public async Task<ApiResult<bool>> UpdateAccountAsync(AccountRq request, bool updateAll = true)
-    {
         var accountRepo = _unitOfWork.GetRepository<Account>();
 
-        var existAccount = await accountRepo.GetOneAsync(a => a.Id == request.Id, hasTracking: true)
-            ?? throw new NotFoundException("Not found this Id account!");
+        var existAccount = await accountRepo.GetOneAsync(a => a.Id == request.Id, hasTracking: true);
+
+        if (existAccount == null) return ResultRs<bool>.NotFound("Not found this Id account!");
 
         var temp = existAccount;
 
@@ -268,21 +220,33 @@ public class AccountService : IAccountService
             existAccount.Role = temp.Role;
         }
 
+        // Cannot Update Password through this method. Use ResetPassword instead
+        existAccount.PasswordHash = temp.PasswordHash;
+
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ApiResult<bool>.Ok(true) : ApiResult<bool>.Failure(false);
+             ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
     }
 
-    public async Task<ApiResult<bool>> DeleteAccountAsync(Guid id)
+    public async Task<ResultRs<bool>> DeleteAccountAsync(Guid id)
     {
         var accountRepo = _unitOfWork.GetRepository<Account>();
 
-        var existAccount = await accountRepo.GetByIdAsync(id)
-            ?? throw new NotFoundException("Not found this Id account!");
+        var existAccount = await accountRepo.GetByIdAsync(id);
+        if (existAccount == null)
+            return ResultRs<bool>.NotFound("Not found this Id account!");
 
         // Soft delete
         existAccount.Status = "Deleted";
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ApiResult<bool>.Created(true) : ApiResult<bool>.Failure(false);
+            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+    }
+
+    private static (string token, DateTime time) GenerateNewRefreshToken()
+    {
+        // Get expire limit day in env
+        var exDay = int.TryParse(Environment.GetEnvironmentVariable("JWT_REFRESH_TOKEN_EXPIRATION_DAYS"), out var d)
+        ? d : 7;
+        return (StringUtils.GenerateRefreshToken(), DateTime.Now.AddDays(exDay));
     }
 }
