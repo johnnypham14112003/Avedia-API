@@ -1,10 +1,13 @@
-﻿using BusinessLogic.DTOs.Messages;
+﻿using BusinessLogic.DTOs.Generic;
+using BusinessLogic.DTOs.Messages;
 using BusinessLogic.DTOs.Messages.Request;
+using BusinessLogic.DTOs.Messages.Request.Query;
 using BusinessLogic.DTOs.Messages.Response;
 using BusinessLogic.Extensions.Utils;
 using BusinessLogic.Interfaces;
 using DataAccess.Interfaces;
 using DataAccess.Models;
+using LinqKit;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,9 +18,6 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     // ===========================< METHODS >===========================
-    /// <summary>
-    ///     This method is similar to login but instead of handling access token, it will just handle refresh token
-    /// </summary>
     public async Task<ResultRs<AccountRs>> GetByPasswordAsync(AuthRq authRequest)
     {
         // Validate email
@@ -129,74 +129,73 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         return ResultRs<AccountRs>.Ok(account.Adapt<AccountRs>());
     }
 
-    //public async Task<PagedResult<AccountRs>> GetAccountsPageAsync(PagingQueryRq<AccountQr> input)
-    //{
-    //    // Query form builder
-    //    var predicate = PredicateBuilder.New<Account>(true);
+    public async Task<ResultRs<PagedResult<AccountRs>>> GetAccountsPageAsync(PagingQueryRq<AccountQr> input)
+    {
+        input.PageNumber = input.PageNumber > 0 ? input.PageNumber : 1;
+        input.PageSize = input.PageSize > 0 ? input.PageSize : 10;
 
-    //    // ------------------------------------------
-    //    if (!string.IsNullOrWhiteSpace(input.Keyword))
-    //    {
-    //        predicate = predicate.And(a => a.UserName.Contains(input.Keyword));
-    //        predicate = predicate.And(a => a.Email.Contains(input.Keyword));
-    //    }
+        // Query form builder
+        var predicate = PredicateBuilder.New<Account>(true);
 
-    //    if (input.AdvanceInput is not null)
-    //    {
-    //        // IsVerified
-    //        if (input.AdvanceInput.IsVerified.HasValue)
-    //            predicate = predicate.And(a => a.IsVerified == input.AdvanceInput.IsVerified);
+        // ------------------------------------------
+        if (!string.IsNullOrWhiteSpace(input.Keyword))
+        {
+            predicate = predicate.And(a => a.UserName.Contains(input.Keyword));
+            predicate = predicate.And(a => a.Email.Contains(input.Keyword));
+        }
 
-    //        // Gender
-    //        switch (input.AdvanceInput.Gender)
-    //        {
-    //            case 0:
-    //                predicate = predicate.And(a => a.Gender == false);
-    //                break;
-    //            case 1:
-    //                predicate = predicate.And(a => a.Gender == true);
-    //                break;
-    //            case 2:
-    //                predicate = predicate.And(a => a.Gender == null);
-    //                break;
-    //        }
+        if (input.AdvanceInput is not null)
+        {
+            // IsVerified
+            if (input.AdvanceInput.IsVerified.HasValue)
+                predicate = predicate.And(a => a.IsVerified == input.AdvanceInput.IsVerified);
 
-    //        // Nationality
-    //        if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Nationality))
-    //            predicate = predicate.And(a => a.Nationality!.Equals(input.AdvanceInput.Nationality));
+            // Gender
+            predicate = input.AdvanceInput.Gender switch
+            {
+                1 => (ExpressionStarter<Account>)predicate.And(a => a.Gender == true),
+                2 => (ExpressionStarter<Account>)predicate.And(a => a.Gender == false),
+                _ => (ExpressionStarter<Account>)predicate.And(a => a.Gender == null),
+            };
 
-    //        // JoinedDate
-    //        if (input.AdvanceInput.FromDate.HasValue)
-    //            predicate = predicate.And(a => a.JoinedDate >= input.AdvanceInput.FromDate);
-    //        if (input.AdvanceInput.ToDate.HasValue)
-    //            predicate = predicate.And(a => a.JoinedDate < input.AdvanceInput.ToDate.Value.AddDays(1));
+            // Nationality
+            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Nationality))
+                predicate = predicate.And(a => a.Nationality!.Equals(input.AdvanceInput.Nationality));
 
-    //        // Role
-    //        if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Role))
-    //            predicate = predicate.And(a => a.Role.Equals(input.AdvanceInput.Role));
+            // JoinedDate
+            if (input.AdvanceInput.FromDate.HasValue)
+                predicate = predicate.And(a => a.JoinedDate >= input.AdvanceInput.FromDate);
+            if (input.AdvanceInput.ToDate.HasValue)
+                predicate = predicate.And(a => a.JoinedDate < input.AdvanceInput.ToDate.Value.AddDays(1));
 
-    //        // Status
-    //        if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Status))
-    //            predicate = predicate.And(a => a.Status.Equals(input.AdvanceInput.Status));
-    //    }
-    //    // ------------------------------------------
-    //    var accountRepo = _unitOfWork.GetRepository<Account>();
-    //    var accounts = (
-    //        await accountRepo.GetPagedAsync(
-    //            predicate: predicate,
-    //            pageNumber: input.PageNumber,
-    //            pageSize: input.PageSize)
-    //        ).Adapt<IEnumerable<AccountRs>>();
+            // Role
+            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Role))
+                predicate = predicate.And(a => a.Role.Equals(input.AdvanceInput.Role));
 
-    //    return PagedResult<AccountRs>.Ok(
-    //        new PagedResult<AccountRs>
-    //        {
-    //            TotalCount = await accountRepo.CountAsync(x => true),
-    //            PageSize = input.PageSize,
-    //            PageIndex = input.PageNumber,
-    //            DataList = accounts
-    //        });
-    //}
+            // Status
+            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Status))
+                predicate = predicate.And(a => a.Status.Equals(input.AdvanceInput.Status));
+        }
+        // ------------------------------------------
+        var accountRepo = _unitOfWork.GetRepository<Account>();
+        var accounts = (
+            await accountRepo.GetPagedAsync(
+                predicate: predicate,
+                pageNumber: input.PageNumber,
+                pageSize: input.PageSize)
+            ).Adapt<IEnumerable<AccountRs>>();
+
+        return accounts.Any() ?
+            ResultRs<PagedResult<AccountRs>>.Ok(
+                new PagedResult<AccountRs>
+                {
+                    TotalCount = await accountRepo.CountAsync(x => true),
+                    PageSize = input.PageSize,
+                    PageIndex = input.PageNumber,
+                    DataList = accounts
+                }) :
+            ResultRs<PagedResult<AccountRs>>.NotFound();
+    }
 
     public async Task<ResultRs<bool>> UpdateAccountAsync(AccountRq request, bool updateAll = true)
     {

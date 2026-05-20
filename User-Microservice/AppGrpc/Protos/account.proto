@@ -5,16 +5,15 @@ option csharp_namespace = "AppGrpc.Protos";
 package user_service;
 
 import "Protos/models.proto";
-import "google/protobuf/wrappers.proto";
-import "google/protobuf/timestamp.proto";
 
 service AccountGrpcService {
     rpc GetByPasswordAsync (AuthRequest) returns (AccountResponse);
-    rpc GetNewRefreshToken (TokenRequest) returns (AccountResponse);
+    rpc GetNewRefreshToken (AccountGetter) returns (AccountResponse);
     rpc RevokeRefreshTokenAsync (AccountGetter) returns (AccountResponse);
     rpc ChangePasswordAsync (AuthRequest) returns (AccountResponse);
 	rpc CreateAccountAsync (AuthRequest) returns (AccountResponse);
     rpc GetAccountAsync (AccountGetter) returns (AccountResponse);
+    rpc GetAccountListAsync(AccountPageRequest) returns (AccountPageResponse);
     rpc UpdateAccountAsync (AccountRequest) returns (AccountResponse);
     rpc DeleteAccountAsync (AccountGetter) returns (AccountResponse);
 }
@@ -23,22 +22,33 @@ service AccountGrpcService {
 message AccountRequest {
     AccountInfo account_info = 1;
 
-    bool update_all = 2;
+    optional bool update_all = 2;
 }
 
 message AccountGetter {
     string id = 1;
-    bool include_badge = 2;
-}
-
-message TokenRequest {
-    string account_id = 1;
-    google.protobuf.StringValue refresh_token = 2;
+    optional bool include_badge = 2;
+    optional string refresh_token = 3;
 }
 
 message AuthRequest {
     string email = 1;
     string password = 2;
+}
+
+message AccountQuery {
+    optional bool is_verified = 1;
+    int32 gender = 2;
+    optional string nationality = 3;
+    optional string from_date = 4;
+    optional string to_date = 5;
+    optional string role = 6;
+    optional string status = 7;
+}
+
+message AccountPageRequest {
+    PageQueryRequest page_query_request = 1;
+    optional AccountQuery advance_input = 4;
 }
 
 // ------ Response
@@ -53,4 +63,14 @@ message AccountResponse {
     }
 
     repeated AccountBadgeResponse account_badge_response = 3;
+}
+
+message AccountPageResponse{
+    ResultResponse result_response = 1;
+
+    message AccountPagedResult {
+        BasePageResult base_page_result = 1;
+        repeated AccountInfo data_list = 2; 
+    }
+    AccountPagedResult paged_data = 2;
 }

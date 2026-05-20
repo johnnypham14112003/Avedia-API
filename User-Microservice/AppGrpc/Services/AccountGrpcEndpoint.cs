@@ -1,5 +1,7 @@
 ﻿using AppGrpc.Protos;
+using BusinessLogic.DTOs.Generic;
 using BusinessLogic.DTOs.Messages.Request;
+using BusinessLogic.DTOs.Messages.Request.Query;
 using BusinessLogic.Interfaces;
 using Grpc.Core;
 using Mapster;
@@ -30,9 +32,9 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
         };
     }
 
-    public override async Task<AccountResponse> GetNewRefreshToken(TokenRequest request, ServerCallContext context)
+    public override async Task<AccountResponse> GetNewRefreshToken(AccountGetter request, ServerCallContext context)
     {
-        var isParsed = Guid.TryParse(request.AccountId, out var parsedId);
+        var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
             return new AccountResponse { ResultResponse = new ResultResponse { ErrorCode = 400, ErrorMessage = "ID invalid!" } };
 
@@ -107,20 +109,22 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
 
         var result = await _accountService.GetAccountAsync(parsedId, request.IncludeBadge);
 
+        // --------- MAP DATA TO PROTO ---------
+        // Create proto message response [AccountResponse](0)
         var response = new AccountResponse
         {
+            // Assign to proto message [ResultResponse](1)
             ResultResponse = new ResultResponse
             {
                 Success = result.Success,
                 ErrorCode = result.HttpCode,
                 ErrorMessage = result.ErrorMessage,
-            },
+            }
         };
 
-        // --------- MAP DATA TO PROTO ---------
         if (result.Data != null)
         {
-            // Map default Account
+            // Assign to proto message [AccountInfo](2)
             response.AccountInfo = result.Data.Adapt<AccountInfo>();
 
             // If have list Badge, use Linq to extract and assign
@@ -139,6 +143,88 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
                 // Use AddRange to put in array repeated of Protobuf
                 response.AccountBadgeResponse.AddRange(mappedAccountBadgesResponse);
             }
+        }
+
+        return response;
+    }
+
+    public override async Task<AccountPageResponse> GetAccountListAsync(AccountPageRequest request, ServerCallContext context)
+    {
+        // For parse DateOnly safety
+        DateOnly? parsedFromDate = null;
+        DateOnly? parsedToDate = null;
+
+        var pageQuery = request.PageQueryRequest;
+        var advanceInput = request.AdvanceInput;
+
+        if (request.AdvanceInput != null)
+        {
+            if (!string.IsNullOrEmpty(request.AdvanceInput.FromDate))
+                parsedFromDate = DateOnly.Parse(advanceInput.FromDate);
+
+            if (!string.IsNullOrEmpty(request.AdvanceInput.ToDate))
+                parsedToDate = DateOnly.Parse(advanceInput.ToDate);
+        }
+
+        // ==========[ Mapping PROTO -> DTOs ]==========
+        var queryInput = new PagingQueryRq<AccountQr>
+        {
+            Keyword = pageQuery.Keyword,
+            PageNumber = pageQuery.PageNumber,
+            PageSize = pageQuery.PageSize,
+            AdvanceInput = (advanceInput == null) ? null :
+            new AccountQr
+            {
+                IsVerified = advanceInput.IsVerified,
+                Gender = (short)advanceInput.Gender,
+                Nationality = advanceInput.Nationality,
+                Role = advanceInput.Role,
+                Status = advanceInput.Status,
+                FromDate = parsedFromDate,
+                ToDate = parsedToDate
+            }
+        };
+
+        // Call Repository Method to query in database
+        var pagedResult = await _accountService.GetAccountsPageAsync(queryInput);
+
+        // ==========[ Mapping DATA -> PROTO ]==========
+        // Create proto message [AccountPageResponse](0)
+        var response = new AccountPageResponse
+        {
+            // Assign to proto message [ResultResponse](1)
+            ResultResponse = new ResultResponse
+            {
+                Success = pagedResult.Success,
+                ErrorCode = pagedResult.HttpCode,
+                ErrorMessage = pagedResult.ErrorMessage,
+            }
+        };
+
+        if (pagedResult.Data != null)
+        {
+            // Create proto message [AccountPagedResult](2*)
+            var pagedDataProto = new AccountPageResponse.Types.AccountPagedResult
+            {
+                // Assign to proto message [BasePageResult](2.1)
+                BasePageResult = new BasePageResult
+                {
+                    PageIndex = pagedResult.Data.PageIndex,
+                    PageSize = pagedResult.Data.PageSize,
+                    TotalCount = pagedResult.Data.TotalCount,
+                    TotalPage = pagedResult.Data.TotalPage
+                }
+            };
+
+            // Assign to proto message [repeated AccountInfo](2.2)
+            if (pagedResult.Data.DataList != null && pagedResult.Data.DataList.Any())
+            {
+                // AccountRs:cs -> AccountInfo:proto
+                var mappedList = pagedResult.Data.DataList.Adapt<IEnumerable<AccountInfo>>();
+                pagedDataProto.DataList.AddRange(mappedList);
+            }
+            // Assign to proto message [AccountPagedResult](2)
+            response.PagedData = pagedDataProto;
         }
 
         return response;
