@@ -1,6 +1,6 @@
-﻿namespace BusinessLogic.DTOs.Messages.Response;
+﻿namespace BusinessLogic.DTOs.Messages.Request;
 
-public class BadgeRs
+public class BadgeRq
 {
     public Guid Id { get; set; }
 
@@ -17,5 +17,4 @@ public class BadgeRs
     public DateOnly CreatedDate { get; set; }
 
     public string Status { get; set; } = null!;
-    public virtual ICollection<AccountBadgeRs>? AccountBadges { get; set; }
 }
