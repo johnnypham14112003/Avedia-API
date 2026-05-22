@@ -41,4 +41,5 @@ public interface IAccountService
     /// </summary>
     Task<ResultRs<bool>> UpdateAccountAsync(AccountRq request, bool updateAll = true);
     Task<ResultRs<bool>> DeleteAccountAsync(Guid id);
+    Task<ResultRs<bool>> DeletePermanentAccountAsync(Guid id);
 }

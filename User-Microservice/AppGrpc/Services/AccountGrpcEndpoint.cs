@@ -263,4 +263,23 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
             }
         };
     }
+
+    public override async Task<AccountResponse> DeletePermanentAccountAsync(AccountGetter request, ServerCallContext context)
+    {
+        var isParsed = Guid.TryParse(request.Id, out var parsedId);
+        if (isParsed == false || parsedId == Guid.Empty)
+            return new AccountResponse { ResultResponse = new ResultResponse { ErrorCode = 400, ErrorMessage = "ID invalid!" } };
+
+        var result = await _accountService.DeletePermanentAccountAsync(parsedId);
+
+        return new AccountResponse
+        {
+            ResultResponse = new ResultResponse
+            {
+                Success = result.Success,
+                ErrorCode = result.HttpCode,
+                ErrorMessage = result.ErrorMessage,
+            }
+        };
+    }
 }

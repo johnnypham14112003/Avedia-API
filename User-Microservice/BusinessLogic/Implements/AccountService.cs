@@ -155,7 +155,8 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             {
                 1 => (ExpressionStarter<Account>)predicate.And(a => a.Gender == true),
                 2 => (ExpressionStarter<Account>)predicate.And(a => a.Gender == false),
-                _ => (ExpressionStarter<Account>)predicate.And(a => a.Gender == null),
+                3 => (ExpressionStarter<Account>)predicate.And(a => a.Gender == null),
+                _ => predicate
             };
 
             // Nationality
@@ -189,7 +190,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             ResultRs<PagedResult<AccountRs>>.Ok(
                 new PagedResult<AccountRs>
                 {
-                    TotalCount = await accountRepo.CountAsync(x => true),
+                    TotalCount = await accountRepo.CountAsync(predicate),
                     PageSize = input.PageSize,
                     PageIndex = input.PageNumber,
                     DataList = accounts
@@ -241,6 +242,22 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
     }
 
+    public async Task<ResultRs<bool>> DeletePermanentAccountAsync(Guid id)
+    {
+        var accountRepo = _unitOfWork.GetRepository<Account>();
+
+        var existAccount = await accountRepo.GetByIdAsync(id);
+        if (existAccount == null)
+            return ResultRs<bool>.NotFound("Not found this Id account!");
+        
+        // Hard Delete
+        await _unitOfWork.GetRepository<Account>().DeleteAsync(existAccount);
+
+        return (await _unitOfWork.CompleteAsync() > 0)
+            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+    }
+
+    // ----------------------------[ Helper Method ]----------------------------
     private static (string token, DateTime time) GenerateNewRefreshToken()
     {
         // Get expire limit day in env

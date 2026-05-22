@@ -16,6 +16,7 @@ service AccountGrpcService {
     rpc GetAccountListAsync(AccountPageRequest) returns (AccountPageResponse);
     rpc UpdateAccountAsync (AccountRequest) returns (AccountResponse);
     rpc DeleteAccountAsync (AccountGetter) returns (AccountResponse);
+    rpc DeletePermanentAccountAsync (AccountGetter) returns (AccountResponse);
 }
 
 // ------ Request

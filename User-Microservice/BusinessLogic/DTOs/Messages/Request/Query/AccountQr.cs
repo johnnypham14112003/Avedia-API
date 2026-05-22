@@ -3,7 +3,7 @@
 public class AccountQr
 {
     public bool? IsVerified { get; set; }
-    public short Gender { get; set; }
+    public short Gender { get; set; } = 0;
     public string? Nationality { get; set; }
     public DateOnly? FromDate { get; set; }
     public DateOnly? ToDate { get; set; }
