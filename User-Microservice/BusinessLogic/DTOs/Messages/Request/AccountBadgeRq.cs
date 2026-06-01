@@ -1,4 +1,4 @@
-﻿namespace BusinessLogic.DTOs.Messages.Request.Query;
+﻿namespace BusinessLogic.DTOs.Messages.Request;
 
 public class AccountBadgeRq
 {

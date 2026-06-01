@@ -22,12 +22,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            },
+            ResultResponse = result.Adapt<ResultResponse>(),
             AccountInfo = result.Data.Adapt<AccountInfo>()
         };
     }
@@ -36,18 +31,13 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
-            return new AccountResponse { ResultResponse = new ResultResponse { ErrorCode = 400, ErrorMessage = "ID invalid!" } };
+            return new AccountResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
 
         var result = await _accountService.RefreshTokenAsync(parsedId, request.RefreshToken);
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            },
+            ResultResponse = result.Adapt<ResultResponse>(),
             AccountInfo = result.Data.Adapt<AccountInfo>()
         };
     }
@@ -56,18 +46,13 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
-            return new AccountResponse { ResultResponse = new ResultResponse { ErrorCode = 400, ErrorMessage = "ID invalid!" } };
+            return new AccountResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
 
         var result = await _accountService.RevokeRefreshTokenAsync(parsedId);
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            }
+            ResultResponse = result.Adapt<ResultResponse>()
         };
     }
 
@@ -77,12 +62,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            }
+            ResultResponse = result.Adapt<ResultResponse>()
         };
     }
 
@@ -92,12 +72,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            }
+            ResultResponse = result.Adapt<ResultResponse>()
         };
     }
 
@@ -105,7 +80,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
-            return new AccountResponse { ResultResponse = new ResultResponse { ErrorCode = 400, ErrorMessage = "ID invalid!" } };
+            return new AccountResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
 
         var result = await _accountService.GetAccountAsync(parsedId, request.IncludeBadge);
 
@@ -114,12 +89,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
         var response = new AccountResponse
         {
             // Assign to proto message [ResultResponse](1)
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            }
+            ResultResponse = result.Adapt<ResultResponse>()
         };
 
         if (result.Data != null)
@@ -193,12 +163,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
         var response = new AccountPageResponse
         {
             // Assign to proto message [ResultResponse](1)
-            ResultResponse = new ResultResponse
-            {
-                Success = pagedResult.Success,
-                ErrorCode = pagedResult.HttpCode,
-                ErrorMessage = pagedResult.ErrorMessage,
-            }
+            ResultResponse = pagedResult.Adapt<ResultResponse>()
         };
 
         if (pagedResult.Data != null)
@@ -236,12 +201,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            }
+            ResultResponse = result.Adapt<ResultResponse>()
         };
     }
 
@@ -249,18 +209,13 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
-            return new AccountResponse { ResultResponse = new ResultResponse { ErrorCode = 400, ErrorMessage = "ID invalid!" } };
+            return new AccountResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
 
         var result = await _accountService.DeleteAccountAsync(parsedId);
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            }
+            ResultResponse = result.Adapt<ResultResponse>()
         };
     }
 
@@ -268,18 +223,13 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
-            return new AccountResponse { ResultResponse = new ResultResponse { ErrorCode = 400, ErrorMessage = "ID invalid!" } };
+            return new AccountResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
 
         var result = await _accountService.DeletePermanentAccountAsync(parsedId);
 
         return new AccountResponse
         {
-            ResultResponse = new ResultResponse
-            {
-                Success = result.Success,
-                ErrorCode = result.HttpCode,
-                ErrorMessage = result.ErrorMessage,
-            }
+            ResultResponse = result.Adapt<ResultResponse>()
         };
     }
 }
