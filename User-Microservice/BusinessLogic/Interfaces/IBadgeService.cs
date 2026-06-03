@@ -13,8 +13,13 @@ namespace BusinessLogic.Interfaces
         Task<ResultRs<BadgeRs>> GetBadgeAsync(Guid id);
         Task<ResultRs<PagedResult<BadgeRs>>> GetBadgesPageAsync(PagingQueryRq<BadgeQr> input);
         Task<ResultRs<bool>> UpdateBadgeAsync(BadgeRq request);
+        /// <summary>Delete soft (change status)</summary>
+        /// <param name="id">account id</param>
         Task<ResultRs<bool>> DeleteBadgeAsync(Guid id);
+        /// <summary>Delete permanent</summary>
+        /// <param name="id">account id</param>
         Task<ResultRs<bool>> DeletePermanentBadgeAsync(Guid id);
+        /// <summary>Delete permanent</summary>
         Task<ResultRs<bool>> RemoveAllBadgesFromAccountAsync(Guid accountId);
     }
 }

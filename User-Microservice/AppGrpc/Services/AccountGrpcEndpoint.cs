@@ -127,12 +127,13 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
         var pageQuery = request.PageQueryRequest;
         var advanceInput = request.AdvanceInput;
 
-        if (request.AdvanceInput != null)
+        // Pre-check message before map to service method's param
+        if (advanceInput != null)
         {
-            if (!string.IsNullOrEmpty(request.AdvanceInput.FromDate))
+            if (!string.IsNullOrEmpty(advanceInput.FromDate))
                 parsedFromDate = DateOnly.Parse(advanceInput.FromDate);
 
-            if (!string.IsNullOrEmpty(request.AdvanceInput.ToDate))
+            if (!string.IsNullOrEmpty(advanceInput.ToDate))
                 parsedToDate = DateOnly.Parse(advanceInput.ToDate);
         }
 
@@ -197,7 +198,7 @@ public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
 
     public override async Task<AccountResponse> UpdateAccountAsync(AccountRequest request, ServerCallContext context)
     {
-        var result = await _accountService.UpdateAccountAsync(request.Adapt<AccountRq>(), request.UpdateAll);
+        var result = await _accountService.UpdateAccountAsync(request.AccountInfo.Adapt<AccountRq>(), request.UpdateAll);
 
         return new AccountResponse
         {
