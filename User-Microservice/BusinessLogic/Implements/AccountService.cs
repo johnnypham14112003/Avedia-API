@@ -74,7 +74,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             account.RefreshTokenExpirytime = null;
         }
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<bool>> ChangePasswordAsync(string email, string newPassword)
@@ -89,7 +89,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         account.RefreshTokenExpirytime = null;
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     // ----------------------------< CRUD >----------------------------
@@ -111,7 +111,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         });
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<AccountRs>> GetAccountAsync(Guid id, bool includeBadge = false)
@@ -224,7 +224,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         existAccount.PasswordHash = temp.PasswordHash;
 
         return (await _unitOfWork.CompleteAsync() > 0)
-             ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+             ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<bool>> DeleteAccountAsync(Guid id)
@@ -239,7 +239,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         existAccount.Status = "Deleted";
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<bool>> DeletePermanentAccountAsync(Guid id)
@@ -254,7 +254,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         await _unitOfWork.GetRepository<Account>().DeleteAsync(existAccount);
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     // ----------------------------[ Helper Method ]----------------------------

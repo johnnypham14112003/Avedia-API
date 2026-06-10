@@ -15,6 +15,10 @@ public class ResultRs<T>
     public int HttpCode { get; set; } = 0;
 
     public static ResultRs<T> Ok(T? data) => new() { Success = true, Data = data, HttpCode = 200 };
+    /// <summary>
+    /// For response that have no data, only boolean as result
+    /// </summary>
+    public static ResultRs<bool> OkBool(bool result) => new() { Success = result, HttpCode = 200 };
     public static ResultRs<T> BadRequest(string message = "The request is invalid to handle!") => new() { Success = false, ErrorMessage = message , HttpCode = 400};
     public static ResultRs<T> NotFound(string message = "Not found the resource!") => new() { Success = false, ErrorMessage = message , HttpCode = 404};
     public static ResultRs<T> Conflict(string message = "The resource trying to handle is duplicated or cannot be changed") => new() { Success = false, ErrorMessage = message , HttpCode = 409};

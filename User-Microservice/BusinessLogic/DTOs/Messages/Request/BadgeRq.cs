@@ -2,7 +2,7 @@
 
 public class BadgeRq
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public string Title { get; set; } = null!;
 
@@ -16,5 +16,5 @@ public class BadgeRq
 
     public DateOnly CreatedDate { get; set; }
 
-    public string Status { get; set; } = null!;
+    public string? Status { get; set; }
 }

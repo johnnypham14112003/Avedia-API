@@ -8,13 +8,9 @@ using Mapster;
 
 namespace AppGrpc.Services;
 
-public class AccountGrpcEndpoint : AccountGrpcService.AccountGrpcServiceBase
+public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcService.AccountGrpcServiceBase
 {
-    private readonly IAccountService _accountService;
-    public AccountGrpcEndpoint(IAccountService accountService)
-    {
-        _accountService = accountService;
-    }
+    private readonly IAccountService _accountService = accountService;
 
     public override async Task<AccountResponse> GetByPasswordAsync(AuthRequest request, ServerCallContext context)
     {

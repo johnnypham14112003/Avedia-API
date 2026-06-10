@@ -9,13 +9,9 @@ using Mapster;
 
 namespace AppGrpc.Services;
 
-public class BadgeGrpcEndpoint : BadgeGrpcService.BadgeGrpcServiceBase
+public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.BadgeGrpcServiceBase
 {
-    private readonly IBadgeService _badgeService;
-    public BadgeGrpcEndpoint(IBadgeService badgeService)
-    {
-        _badgeService = badgeService;
-    }
+    private readonly IBadgeService _badgeService = badgeService;
 
     public override async Task<BadgeResponse> AddBadgeToUserAsync(AccountBadgeRequest request, ServerCallContext context)
     {

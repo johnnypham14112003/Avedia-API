@@ -3,6 +3,7 @@ using BusinessLogic.DTOs.Messages;
 using BusinessLogic.DTOs.Messages.Request;
 using BusinessLogic.DTOs.Messages.Request.Query;
 using BusinessLogic.DTOs.Messages.Response;
+using BusinessLogic.Extensions.Utils;
 using BusinessLogic.Interfaces;
 using DataAccess.Interfaces;
 using DataAccess.Models;
@@ -26,13 +27,14 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
 
         // 2. Mapster & Add default properties
         var newBadge = request.Adapt<Badge>();
+        newBadge.Id = Guid.NewGuid();
         newBadge.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
         newBadge.Status = string.IsNullOrWhiteSpace(request.Status) ? "Available" : request.Status;
 
         await badgeRepo.AddAsync(newBadge);
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<bool>> AddBadgeToUserAsync(AccountBadgeRq request)
@@ -56,7 +58,7 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         await _unitOfWork.GetRepository<AccountBadge>().AddAsync(newBadge);
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<BadgeRs>> GetBadgeAsync(Guid id)
@@ -133,7 +135,7 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         existBadge.CreatedDate = tempCreatedDate;
 
         return (await _unitOfWork.CompleteAsync() > 0)
-             ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+             ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<bool>> DeleteBadgeAsync(Guid id)
@@ -148,7 +150,7 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         existBadge.Status = "Deleted";
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<bool>> DeletePermanentBadgeAsync(Guid id)
@@ -172,7 +174,7 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         await badgeRepo.DeleteAsync(existBadge);
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 
     public async Task<ResultRs<bool>> RemoveAllBadgesFromAccountAsync(Guid accountId)
@@ -181,12 +183,12 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
 
         var userBadges = await accountBadgeRepo.GetListAsync(ab => ab.AccountId == accountId);
         if (userBadges == null || userBadges.Count == 0)
-            return ResultRs<bool>.Ok(true);
+            return ResultRs<bool>.OkBool(true);
 
         // Delete relate badage
         await accountBadgeRepo.DeleteRangeAsync(userBadges);
 
         return (await _unitOfWork.CompleteAsync() > 0)
-            ? ResultRs<bool>.Ok(true) : ResultRs<bool>.Failure();
+            ? ResultRs<bool>.OkBool(true) : ResultRs<bool>.Failure();
     }
 }
