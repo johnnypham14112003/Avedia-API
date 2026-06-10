@@ -3,3 +3,45 @@ syntax = "proto3";
 option csharp_namespace = "AppGrpc.Protos";
 
 package user_service;
+
+import "Protos/models.proto";
+
+service FavoriteGrpcService {
+    rpc CheckUserFavoritedAsync (FavoriteRequest) returns (FavoriteResponse);
+    rpc CountTargetFavoriteAsync (FavoriteRequest) returns (FavoriteResponse);//input:only target-type,-id
+    rpc GetUserFavoritesAsync (FavoritePageRequest) returns (FavoritePageResponse);
+	rpc ToggleFavoriteAsync (FavoriteRequest) returns (FavoriteResponse);
+}
+
+// ------ Request
+message FavoriteRequest {
+    FavoriteInfo favorite_info = 1;
+}
+
+message FavoriteQuery {
+    optional string lover_id = 1;
+    optional string target_type = 2;
+    optional string target_id = 3;
+}
+
+message FavoritePageRequest {
+    PageQueryRequest page_query_request = 1;
+    optional FavoriteQuery advance_input = 4;
+}
+
+// ------ Response
+message FavoriteResponse {
+    ResultResponse result_response = 1;
+    FavoriteInfo favorite_info = 2;
+    optional int32 favorite_number = 3;
+}
+
+message FavoritePageResponse{
+    ResultResponse result_response = 1;
+
+    message FavoritePagedResult {
+        BasePageResult base_page_result = 1;
+        repeated FavoriteInfo data_list = 2; 
+    }
+    FavoritePagedResult paged_data = 2;
+}
