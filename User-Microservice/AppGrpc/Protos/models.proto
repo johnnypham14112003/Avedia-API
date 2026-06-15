@@ -71,6 +71,7 @@ message NotificationInfo {
     optional string message = 5;
     bool is_global = 6;
     string created_date = 7;
+    optional bool is_read = 8;
 }
 
 message AccountNotificationInfo {

@@ -3,3 +3,54 @@ syntax = "proto3";
 option csharp_namespace = "AppGrpc.Protos";
 
 package user_service;
+
+import "Protos/models.proto";
+
+service NotificationGrpcService {
+    rpc CreateGlobalNotificationAsync (NotificationRequest) returns (NotificationResponse);
+    rpc CreatePersonalNotificationAsync (NotificationRequest) returns (NotificationResponse);
+    rpc GetMyNotificationsAsync (NotificationPageRequest) returns (NotificationPageResponse);
+    rpc MarkAsReadAsync (NotificationGetter) returns (NotificationResponse);
+    rpc MarkAllAsReadAsync (NotificationGetter) returns (NotificationResponse);
+    rpc DeleteNotificationAsync (NotificationGetter) returns (NotificationResponse);
+}
+// ------ Request
+message NotificationRequest {
+    NotificationInfo Notification_info = 1;
+    repeated string list_notification_id= 2;
+}
+
+message NotificationGetter {
+    string account_id = 1;
+    optional string notification_id = 2;
+}
+
+message NotificationQuery {
+    optional string account_id = 1;
+    optional string type = 2;
+    optional string type_id = 3;
+    optional string from_date = 4;
+    optional string to_date = 5;
+    optional bool is_global = 6;
+}
+
+message NotificationPageRequest {
+    PageQueryRequest page_query_request = 1;
+    optional NotificationQuery advance_input = 2;
+}
+
+// ------ Response
+message NotificationResponse {
+    ResultResponse result_response = 1;
+    NotificationInfo Notification_info = 2;
+}
+
+message NotificationPageResponse{
+    ResultResponse result_response = 1;
+
+    message NotificationPagedResult {
+        BasePageResult base_page_result = 1;
+        repeated NotificationInfo data_list = 2; 
+    }
+    NotificationPagedResult paged_data = 2;
+}

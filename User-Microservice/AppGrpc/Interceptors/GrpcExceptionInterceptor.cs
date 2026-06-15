@@ -21,6 +21,12 @@ public class GrpcExceptionInterceptor : Interceptor
         {
             return await continuation(request, context);
         }
+        catch (RpcException ex)
+        {
+            _logger.LogWarning("gRPC Error: {StatusCode} - {Message}", ex.Status.StatusCode, ex.Status.Detail);
+
+            throw;
+        }
         // Catch all other error (Crash DB, NullReference, v.v.)
         catch (Exception ex)
         {
