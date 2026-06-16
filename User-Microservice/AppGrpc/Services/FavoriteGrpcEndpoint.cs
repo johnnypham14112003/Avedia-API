@@ -40,7 +40,7 @@ public class FavoriteGrpcEndpoint(IFavoriteService favoriteService) : FavoriteGr
         var pageQuery = request.PageQueryRequest;
         var advanceInput = request.AdvanceInput;
 
-        _ = Guid.TryParse(advanceInput.LoverId, out var loverId);
+        _ = Guid.TryParse(advanceInput.AccountId, out var AccountId);
         _ = Guid.TryParse(advanceInput.TargetId, out var targetId);
 
         var queryInput = new PagingQueryRq<FavoriteRq>
@@ -51,7 +51,7 @@ public class FavoriteGrpcEndpoint(IFavoriteService favoriteService) : FavoriteGr
             AdvanceInput = (advanceInput == null) ? null :
             new FavoriteRq
             {
-                LoverId = loverId,
+                AccountId = AccountId,
                 TargetId = targetId,
                 TargetType = advanceInput.TargetType
             }

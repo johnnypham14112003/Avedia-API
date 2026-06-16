@@ -17,13 +17,13 @@ public class FavoriteService(IUnitOfWork unitOfWork) : IFavoriteService
     public async Task<ResultRs<bool>> CheckUserFavoritedAsync(FavoriteRq request)
     {
         // Pre validate
-        if (request.LoverId is null || request.TargetId is null ||
-            request.LoverId == Guid.Empty || request.TargetId == Guid.Empty ||
+        if (request.AccountId is null || request.TargetId is null ||
+            request.AccountId == Guid.Empty || request.TargetId == Guid.Empty ||
             string.IsNullOrEmpty(request.TargetType))
             return ResultRs<bool>.BadRequest();
 
         bool hasFavorited = await _unitOfWork.GetRepository<Favorite>().AnyAsync(f =>
-            f.LoverId == request.LoverId &&
+            f.AccountId == request.AccountId &&
             f.TargetType == request.TargetType &&
             f.TargetId == request.TargetId);
 
@@ -33,14 +33,14 @@ public class FavoriteService(IUnitOfWork unitOfWork) : IFavoriteService
     public async Task<ResultRs<bool>> ToggleFavoriteAsync(FavoriteRq request)
     {
         // Pre validate
-        if (request.LoverId is null || request.TargetId is null ||
-            request.LoverId == Guid.Empty || request.TargetId == Guid.Empty ||
+        if (request.AccountId is null || request.TargetId is null ||
+            request.AccountId == Guid.Empty || request.TargetId == Guid.Empty ||
             string.IsNullOrEmpty(request.TargetType))
             return ResultRs<bool>.BadRequest();
 
         var favoriteRepo = _unitOfWork.GetRepository<Favorite>();
         var existFavorite = await favoriteRepo.GetOneAsync(f =>
-            f.LoverId == request.LoverId &&
+            f.AccountId == request.AccountId &&
             f.TargetType == request.TargetType &&
             f.TargetId == request.TargetId);
 
@@ -55,7 +55,7 @@ public class FavoriteService(IUnitOfWork unitOfWork) : IFavoriteService
         // Favorite if not yet
         await favoriteRepo.AddAsync(new Favorite
         {
-            LoverId = (Guid)request.LoverId,
+            AccountId = (Guid)request.AccountId,
             TargetType = request.TargetType,
             TargetId = (Guid)request.TargetId
         });
@@ -80,7 +80,7 @@ public class FavoriteService(IUnitOfWork unitOfWork) : IFavoriteService
         {
             // if any condition is null => true (EntityFramework will skip that condition and move on to next one)
             predicate = f =>
-                (query.LoverId == null || query.LoverId == Guid.Empty || f.LoverId == query.LoverId) &&
+                (query.AccountId == null || query.AccountId == Guid.Empty || f.AccountId == query.AccountId) &&
                 (string.IsNullOrEmpty(query.TargetType) || f.TargetType == query.TargetType);
         }
 

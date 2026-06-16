@@ -2,7 +2,7 @@
 
 public class FavoriteRq
 {
-    public Guid? LoverId { get; set; }
+    public Guid? AccountId { get; set; }
 
     public string? TargetType { get; set; }
 

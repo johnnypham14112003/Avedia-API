@@ -11,7 +11,7 @@ public interface IFavoriteService
     Task<ResultRs<int>> CountTargetFavoriteAsync(string targetType, Guid targetId);
     /// <summary><![CDATA[
     /// Must put data <FavoriteRq> into]]> [<paramref name="input"/>.AdvanceInput]<![CDATA[
-    /// and also the]]> [<paramref name="input"/>.AdvanceInput.LoverId] ; [<paramref name="input"/>.AdvanceInput.TargetType]</summary>
+    /// and also the]]> [<paramref name="input"/>.AdvanceInput.AccountId] ; [<paramref name="input"/>.AdvanceInput.TargetType]</summary>
     Task<ResultRs<PagedResult<FavoriteRs>>> GetUserFavoritesAsync(PagingQueryRq<FavoriteRq> input);
 
     /// <returns><![CDATA[

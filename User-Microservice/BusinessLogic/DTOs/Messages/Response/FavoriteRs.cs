@@ -4,7 +4,7 @@ public class FavoriteRs
 {
     public Guid Id { get; set; }
 
-    public Guid LoverId { get; set; }
+    public Guid AccountId { get; set; }
 
     public string TargetType { get; set; } = null!;
 

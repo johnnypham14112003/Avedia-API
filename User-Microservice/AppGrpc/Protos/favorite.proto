@@ -19,7 +19,7 @@ message FavoriteRequest {
 }
 
 message FavoriteQuery {
-    optional string lover_id = 1;
+    optional string account_id = 1;
     optional string target_type = 2;
     optional string target_id = 3;
 }

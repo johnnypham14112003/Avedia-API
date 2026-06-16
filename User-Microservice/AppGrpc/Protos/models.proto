@@ -85,18 +85,19 @@ message ContributionInfo {
     string id = 1;
     string contributor_id = 2;
     optional string approver_id = 3;
-    bool admin_reviewed = 4;
+    bool admin_approved = 4;
     string target_type = 5;
     optional string target_id = 6;
     string action_type = 7;
-    string requested_date = 8; 
-    optional string proposed_data = 9;
-    string status = 10;
+    string handled_date = 8;
+    string requested_date = 9;
+    optional string proposed_data = 10;
+    string status = 11;
 }
 
 message FavoriteInfo {
     string id = 1;
-    string lover_id = 2;
+    string account_id = 2;
     string target_type = 3;
     string target_id = 4;
 }
