@@ -1,7 +1,5 @@
 ﻿using AppGrpc.Interceptors;
 using BusinessLogic.Implements;
-
-//using BusinessLogic.Implements;
 using BusinessLogic.Interfaces;
 using DataAccess;
 using DataAccess.Interfaces;
@@ -44,6 +42,10 @@ public static class DIContainer
     private static IServiceCollection InjectServiceClasses(IServiceCollection services)
     {
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IBadgeService, BadgeService>();
+        services.AddScoped<IContributionService, ContributionService>();
+        services.AddScoped<IFavoriteService, FavoriteService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         return services;
     }

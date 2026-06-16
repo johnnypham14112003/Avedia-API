@@ -25,8 +25,8 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             return ResultRs<AccountRs>.Failure("Invalid Email Format!");
 
         // Check account in database
-        var existAccount = await _unitOfWork.GetRepository<Account>().GetOneAsync(
-            acc => acc.Email.Equals(authRequest.Email));
+        var existAccount = await _unitOfWork.GetRepository<Account>()
+            .GetOneAsync(acc => acc.Email.Equals(authRequest.Email));
 
         // Validate password with hashed password using custom method for security
         if (existAccount == null || BoolUtils.VerifyPassword(authRequest.Password, existAccount.PasswordHash) == false)
@@ -47,12 +47,8 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         var account = await _unitOfWork.GetRepository<Account>().GetOneAsync(u => u.Id == id);
 
         // Validate for refreshing expired access token
-        if (account is null ||
-            account.RefreshToken != refreshToken ||
-            account.RefreshTokenExpirytime <= DateTime.Now)
-        {
-            ResultRs<AccountRs>.BadRequest("Refresh Token is expired or invalid. Please login again.");
-        }
+        if (account is null || account.RefreshToken != refreshToken || account.RefreshTokenExpirytime <= DateTime.Now)
+            return ResultRs<AccountRs>.BadRequest("Refresh Token is expired or invalid. Please login again.");
 
         // Call helper to generate new refresh token and time
         var (token, time) = GenerateNewRefreshToken();
@@ -98,7 +94,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         var accountRepo = _unitOfWork.GetRepository<Account>();
 
         // 1. Validate exist mail
-        bool isEmailExist = await accountRepo.AnyAsync(a => a.Email.ToLower() == request.Email.ToLower());
+        bool isEmailExist = await accountRepo.AnyAsync(a => a.Email.Equals(request.Email));
         if (isEmailExist)
             return ResultRs<bool>.Conflict("This email already been used!");
 

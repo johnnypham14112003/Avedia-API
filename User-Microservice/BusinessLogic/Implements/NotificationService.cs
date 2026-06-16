@@ -81,40 +81,29 @@ public class NotificationService(IUnitOfWork unitOfWork) : INotificationService
 
         // Search by keyword
         if (!string.IsNullOrWhiteSpace(query.Keyword))
-        {
             predicate = predicate.And(n => n.Title.Contains(query.Keyword));
-        }
 
         // If have filter
         if (filter is not null)
         {
             // By Type
             if (!string.IsNullOrWhiteSpace(filter.Type))
-            {
                 predicate = predicate.And(n => n.Type == filter.Type);
-            }
 
             // By TypeId
             if (filter.TypeId.HasValue)
-            {
                 predicate = predicate.And(n => n.TypeId == filter.TypeId.Value);
-            }
 
             // By CreatedDate
             if (filter.FromDate.HasValue)
-            {
                 predicate = predicate.And(n => n.CreatedDate >= filter.FromDate.Value);
-            }
+
             if (filter.ToDate.HasValue)
-            {
                 predicate = predicate.And(n => n.CreatedDate <= filter.ToDate.Value);
-            }
 
             // By Global
             if (filter.IsGlobal.HasValue)
-            {
                 predicate = predicate.And(n => n.IsGlobal == filter.IsGlobal);
-            }
 
             // If query with Account Id
             if (filter.AccountId is not null && filter.AccountId != Guid.Empty)
@@ -241,9 +230,7 @@ public class NotificationService(IUnitOfWork unitOfWork) : INotificationService
         // Delete accNoti reference
         var relatedAccountNotis = await accNotiRepo.GetListAsync(an => an.NotificationId == notificationId);
         if (relatedAccountNotis != null && relatedAccountNotis.Count != 0)
-        {
             await accNotiRepo.DeleteRangeAsync(relatedAccountNotis);
-        }
 
         await notiRepo.DeleteAsync(existNotification);
 

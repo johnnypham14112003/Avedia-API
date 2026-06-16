@@ -1,7 +1,6 @@
 ﻿using AppGrpc.Protos;
 using BusinessLogic.DTOs.Generic;
 using BusinessLogic.DTOs.Messages.Request;
-using BusinessLogic.DTOs.Messages.Request.Query;
 using BusinessLogic.Interfaces;
 using Grpc.Core;
 using Mapster;

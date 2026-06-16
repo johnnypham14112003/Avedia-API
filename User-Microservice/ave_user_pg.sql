@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 	"id" UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	"type" VARCHAR(30),
 	type_id UUID,
-	title VARCHAR(50) NOT NULL,
+	title VARCHAR(50) NOT NULL COLLATE "case_insensitive",
 	"message" TEXT,
 	is_global BOOLEAN NOT NULL DEFAULT FALSE,
 	created_date DATE NOT NULL DEFAULT CURRENT_DATE
@@ -97,9 +97,11 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- 2. GIN Index for search Contains
 CREATE INDEX IF NOT EXISTS idx_accounts_username_trgm ON accounts USING gin (user_name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_accounts_email_trgm ON accounts USING gin (email gin_trgm_ops);
-
 CREATE INDEX IF NOT EXISTS idx_badges_title_trgm ON badges USING gin (title gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_badges_description_trgm ON badges USING gin (description gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_notifications_title_trgm ON notifications USING gin (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_contributions_target_type_trgm ON contributions USING gin (target_type gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_contributions_action_type_trgm ON contributions USING gin (action_type gin_trgm_ops);
 
 -- 3. B-Tree Index for filter fields
 CREATE INDEX IF NOT EXISTS idx_accounts_nationality ON accounts (nationality);
@@ -112,9 +114,9 @@ CREATE INDEX IF NOT EXISTS idx_badges_status ON badges (status);
 -- 4. B-Tree Index for ALL FK (For JOIN / .Include())
 CREATE INDEX IF NOT EXISTS idx_account_badges_account_id ON account_badges (account_id);
 CREATE INDEX IF NOT EXISTS idx_account_badges_badge_id ON account_badges (badge_id);
-
 CREATE INDEX IF NOT EXISTS idx_account_notif_account_id ON account_notifications (account_id);
 CREATE INDEX IF NOT EXISTS idx_account_notif_notif_id ON account_notifications (notification_id);
-
 CREATE INDEX IF NOT EXISTS idx_favorites_account_id ON favorites (account_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_target_id ON favorites (target_id);
 CREATE INDEX IF NOT EXISTS idx_contributions_contributor_id ON contributions (contributor_id);
+CREATE INDEX IF NOT EXISTS idx_contributions_target_id ON contributions (target_id);

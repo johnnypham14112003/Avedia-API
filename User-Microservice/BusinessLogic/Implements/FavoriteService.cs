@@ -85,11 +85,7 @@ public class FavoriteService(IUnitOfWork unitOfWork) : IFavoriteService
         }
 
         // Call DB to query
-        var favorites = await favoriteRepo.GetPagedAsync(
-            pageNumber: pageNumber,
-            pageSize: pageSize,
-            predicate: predicate
-        );
+        var favorites = await favoriteRepo.GetPagedAsync(pageNumber, pageSize, predicate);
 
         if (favorites == null || !favorites.Any())
             return ResultRs<PagedResult<FavoriteRs>>.NotFound();

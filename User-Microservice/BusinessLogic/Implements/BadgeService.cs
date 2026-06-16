@@ -71,15 +71,13 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
 
     public async Task<ResultRs<PagedResult<BadgeRs>>> GetBadgesPageAsync(PagingQueryRq<BadgeQr> input)
     {
-        input.PageNumber = input.PageNumber > 0 ? input.PageNumber : 1;
-        input.PageSize = input.PageSize > 0 ? input.PageSize : 10;
+        var pageNumber = input.PageNumber > 0 ? input.PageNumber : 1;
+        var pageSize = input.PageSize > 0 ? input.PageSize : 10;
 
         // Query form builder
         var predicate = PredicateBuilder.New<Badge>(true);
         if (!string.IsNullOrWhiteSpace(input.Keyword))
-        {
             predicate = predicate.And(b => b.Title.Contains(input.Keyword));
-        }
 
         if (input.AdvanceInput is not null)
         {
@@ -99,21 +97,16 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         }
 
         var badgeRepo = _unitOfWork.GetRepository<Badge>();
-        var badges = (
-            await badgeRepo.GetPagedAsync(
-                predicate: predicate,
-                pageNumber: input.PageNumber,
-                pageSize: input.PageSize)
-            ).Adapt<IEnumerable<BadgeRs>>();
+        var badges = await badgeRepo.GetPagedAsync(pageNumber, pageSize, predicate);
 
         return badges.Any() ?
             ResultRs<PagedResult<BadgeRs>>.Ok(
                 new PagedResult<BadgeRs>
                 {
                     TotalCount = await badgeRepo.CountAsync(predicate),
-                    PageSize = input.PageSize,
-                    PageIndex = input.PageNumber,
-                    DataList = badges
+                    PageSize = pageSize,
+                    PageIndex = pageNumber,
+                    DataList = badges.Adapt<IEnumerable<BadgeRs>>()
                 }) :
             ResultRs<PagedResult<BadgeRs>>.NotFound();
     }
@@ -123,14 +116,16 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         var badgeRepo = _unitOfWork.GetRepository<Badge>();
 
         var existBadge = await badgeRepo.GetOneAsync(b => b.Id == request.Id, hasTracking: true);
+        if (existBadge is null)
+            return ResultRs<bool>.NotFound("Not found this Id badge!");
 
-        if (existBadge == null) return ResultRs<bool>.NotFound("Not found this Id badge!");
-
+        // Temp default data
         var tempCreatedDate = existBadge.CreatedDate;
 
+        // Update new data
         request.Adapt(existBadge);
 
-        // Keep the created date
+        // Keep the old created date
         existBadge.CreatedDate = tempCreatedDate;
 
         return (await _unitOfWork.CompleteAsync() > 0)
@@ -165,9 +160,7 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         // Delete ralate to this badge
         var relatedAccountBadges = await accountBadgeRepo.GetListAsync(ab => ab.BadgeId == id);
         if (relatedAccountBadges != null && relatedAccountBadges.Count != 0)
-        {
             await accountBadgeRepo.DeleteRangeAsync(relatedAccountBadges);
-        }
 
         // Delete badge
         await badgeRepo.DeleteAsync(existBadge);

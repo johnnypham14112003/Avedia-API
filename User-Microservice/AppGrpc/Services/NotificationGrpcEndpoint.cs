@@ -30,9 +30,7 @@ public class NotificationGrpcEndpoint(INotificationService notificationService) 
         var guidList = request.ListNotificationId.Select(id =>
         {
             if (Guid.TryParse(id, out var parsedGuid))
-            {
                 return parsedGuid;
-            }
 
             throw new RpcException(new Status(StatusCode.InvalidArgument, $"The notification Id '{id}' in list is not a valid GUID."));
         });
