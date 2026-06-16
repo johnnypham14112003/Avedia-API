@@ -3,3 +3,58 @@ syntax = "proto3";
 option csharp_namespace = "AppGrpc.Protos";
 
 package user_service;
+
+import "Protos/models.proto";
+
+service ContributionGrpcService {
+	rpc CreateContributionAsync (ContributionRequest) returns (ContributionResponse);
+	rpc GetContributionAsync (ContributionGetter) returns (ContributionResponse);
+	rpc GetContributionsPageAsync (ContributionPageRequest) returns (ContributionPageResponse);
+	rpc UpdateContributionAsync (ContributionRequest) returns (ContributionResponse);
+	rpc DeleteContributionAsync (ContributionGetter) returns (ContributionResponse);
+	rpc StatusContributionAsync (ContributionGetter) returns (ContributionResponse);
+	rpc ReviewContributionAsync (ContributionGetter) returns (ContributionResponse);
+}
+
+// ------ Request
+message ContributionRequest {
+	ContributionInfo contribution_info = 1;
+}
+
+message ContributionGetter {
+	string id = 1;
+	optional string approver_id = 2;
+	optional string new_status = 3;
+}
+
+message ContributionPageRequest {
+    PageQueryRequest page_query_request = 1;
+    ContributionQuery advance_input = 2;
+}
+
+message ContributionQuery {
+    optional string contributor_id = 1;
+    optional string target_id = 2;
+    optional string from_date = 3;
+    optional string to_date = 4;
+    optional bool by_type_date = 5;
+    optional bool admin_approved = 6;
+    optional string status = 7;
+}
+
+// ------ Response
+message ContributionResponse{
+	ResultResponse result_response = 1;
+
+	ContributionInfo contribution_info = 2;
+}
+
+message ContributionPageResponse{
+    ResultResponse result_response = 1;
+
+    message ContributionPagedResult {
+        BasePageResult base_page_result = 1;
+        repeated ContributionInfo data_list = 2; 
+    }
+    ContributionPagedResult paged_data = 2;
+}
