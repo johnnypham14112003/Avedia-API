@@ -7,11 +7,11 @@ public partial class Favorite
 {
     public Guid Id { get; set; }
 
-    public Guid LoverId { get; set; }
+    public Guid AccountId { get; set; }
 
     public string TargetType { get; set; } = null!;
 
     public Guid TargetId { get; set; }
 
-    public virtual Account Lover { get; set; } = null!;
+    public virtual Account Account { get; set; } = null!;
 }

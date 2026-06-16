@@ -3,7 +3,6 @@ using BusinessLogic.DTOs.Messages;
 using BusinessLogic.DTOs.Messages.Request;
 using BusinessLogic.DTOs.Messages.Request.Query;
 using BusinessLogic.DTOs.Messages.Response;
-using BusinessLogic.Extensions.Utils;
 using BusinessLogic.Interfaces;
 using DataAccess.Interfaces;
 using DataAccess.Models;

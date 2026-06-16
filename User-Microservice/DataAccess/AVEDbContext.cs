@@ -219,9 +219,10 @@ public partial class AVEDbContext : DbContext
                 .HasMaxLength(10)
                 .UseCollation("case_insensitive")
                 .HasColumnName("action_type");
-            entity.Property(e => e.AdminReviewed).HasColumnName("admin_reviewed");
+            entity.Property(e => e.AdminApproved).HasColumnName("admin_approved");
             entity.Property(e => e.ApproverId).HasColumnName("approver_id");
             entity.Property(e => e.ContributorId).HasColumnName("contributor_id");
+            entity.Property(e => e.HandledDate).HasColumnName("handled_date");
             entity.Property(e => e.ProposedData)
                 .HasColumnType("jsonb")
                 .HasColumnName("proposed_data");
@@ -255,21 +256,21 @@ public partial class AVEDbContext : DbContext
 
             entity.ToTable("favorites");
 
-            entity.HasIndex(e => e.LoverId, "idx_favorites_lover_id");
+            entity.HasIndex(e => e.AccountId, "idx_favorites_account_id");
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
-            entity.Property(e => e.LoverId).HasColumnName("lover_id");
+            entity.Property(e => e.AccountId).HasColumnName("account_id");
             entity.Property(e => e.TargetId).HasColumnName("target_id");
             entity.Property(e => e.TargetType)
                 .HasMaxLength(30)
                 .UseCollation("case_insensitive")
                 .HasColumnName("target_type");
 
-            entity.HasOne(d => d.Lover).WithMany(p => p.Favorites)
-                .HasForeignKey(d => d.LoverId)
-                .HasConstraintName("favorites_lover_id_fkey");
+            entity.HasOne(d => d.Account).WithMany(p => p.Favorites)
+                .HasForeignKey(d => d.AccountId)
+                .HasConstraintName("favorites_account_id_fkey");
         });
 
         modelBuilder.Entity<Notification>(entity =>

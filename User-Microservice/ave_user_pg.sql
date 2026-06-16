@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 CREATE TABLE IF NOT EXISTS favorites (
 	"id" UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
-	lover_id UUID REFERENCES accounts ("id") ON DELETE CASCADE NOT NULL,
+	account_id UUID REFERENCES accounts ("id") ON DELETE CASCADE NOT NULL,
 	target_type VARCHAR(30) NOT NULL COLLATE "case_insensitive", -- 'Video', 'Actor', 'Blog'
 	target_id UUID NOT NULL -- Soft link to UUID of Video/Actor
 );
@@ -64,10 +64,11 @@ CREATE TABLE IF NOT EXISTS contributions (
 	"id" UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	contributor_id UUID REFERENCES accounts ("id") NOT NULL,
 	approver_id UUID REFERENCES accounts ("id"),
-	admin_reviewed BOOLEAN NOT NULL DEFAULT FALSE,
+	admin_approved BOOLEAN NOT NULL DEFAULT FALSE,
 	target_type VARCHAR(30) NOT NULL COLLATE "case_insensitive", -- 'Video', 'Actor'
 	target_id UUID, -- NULL for request create new
 	action_type VARCHAR(10) NOT NULL COLLATE "case_insensitive",
+	handled_date DATE,
 	requested_date DATE NOT NULL DEFAULT CURRENT_DATE,
 	proposed_data JSONB,
 	status VARCHAR(30) NOT NULL DEFAULT 'Pending' COLLATE "case_insensitive" --'Approved', 'Rejected'
@@ -115,5 +116,5 @@ CREATE INDEX IF NOT EXISTS idx_account_badges_badge_id ON account_badges (badge_
 CREATE INDEX IF NOT EXISTS idx_account_notif_account_id ON account_notifications (account_id);
 CREATE INDEX IF NOT EXISTS idx_account_notif_notif_id ON account_notifications (notification_id);
 
-CREATE INDEX IF NOT EXISTS idx_favorites_lover_id ON favorites (lover_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_account_id ON favorites (account_id);
 CREATE INDEX IF NOT EXISTS idx_contributions_contributor_id ON contributions (contributor_id);

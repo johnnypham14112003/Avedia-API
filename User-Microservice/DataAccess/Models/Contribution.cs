@@ -11,13 +11,15 @@ public partial class Contribution
 
     public Guid? ApproverId { get; set; }
 
-    public bool AdminReviewed { get; set; }
+    public bool AdminApproved { get; set; }
 
     public string TargetType { get; set; } = null!;
 
     public Guid? TargetId { get; set; }
 
     public string ActionType { get; set; } = null!;
+
+    public DateOnly? HandledDate { get; set; }
 
     public DateOnly RequestedDate { get; set; }
 
