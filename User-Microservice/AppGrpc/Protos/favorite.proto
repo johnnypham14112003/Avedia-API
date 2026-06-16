@@ -26,7 +26,7 @@ message FavoriteQuery {
 
 message FavoritePageRequest {
     PageQueryRequest page_query_request = 1;
-    optional FavoriteQuery advance_input = 2;
+    FavoriteQuery advance_input = 2;
 }
 
 // ------ Response

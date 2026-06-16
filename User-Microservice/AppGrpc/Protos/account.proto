@@ -49,7 +49,7 @@ message AccountQuery {
 
 message AccountPageRequest {
     PageQueryRequest page_query_request = 1;
-    optional AccountQuery advance_input = 4;
+    AccountQuery advance_input = 4;
 }
 
 // ------ Response

@@ -36,7 +36,7 @@ message NotificationQuery {
 
 message NotificationPageRequest {
     PageQueryRequest page_query_request = 1;
-    optional NotificationQuery advance_input = 2;
+    NotificationQuery advance_input = 2;
 }
 
 // ------ Response

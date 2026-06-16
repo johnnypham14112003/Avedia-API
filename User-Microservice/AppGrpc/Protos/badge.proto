@@ -16,6 +16,7 @@ service BadgeGrpcService {
 	rpc DeletePermanentBadgeAsync (BadgeGetter) returns (BadgeResponse);
 	rpc RemoveAllBadgesFromAccountAsync (BadgeGetter) returns (BadgeResponse);
 }
+
 // ------ Request
 message BadgeRequest {
 	BadgeInfo badge_info = 1;
@@ -32,7 +33,7 @@ message BadgeGetter {
 
 message BadgePageRequest {
     PageQueryRequest page_query_request = 1;
-    optional BadgeQuery advance_input = 2;
+    BadgeQuery advance_input = 2;
 }
 
 message BadgeQuery {
