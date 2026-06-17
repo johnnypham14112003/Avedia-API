@@ -7,10 +7,10 @@ package user_service;
 import "Protos/models.proto";
 
 service FavoriteGrpcService {
-    rpc CheckUserFavoritedAsync (FavoriteRequest) returns (FavoriteResponse);
-    rpc CountTargetFavoriteAsync (FavoriteRequest) returns (FavoriteResponse);//input:only target-type,-id
-    rpc GetUserFavoritesAsync (FavoritePageRequest) returns (FavoritePageResponse);
-	rpc ToggleFavoriteAsync (FavoriteRequest) returns (FavoriteResponse);
+    rpc CheckUserFavorited (FavoriteRequest) returns (FavoriteResponse);
+    rpc CountTargetFavorite (FavoriteRequest) returns (FavoriteResponse);//input:only target-type,-id
+    rpc GetUserFavorites (FavoritePageRequest) returns (FavoritePageResponse);
+	rpc ToggleFavorite (FavoriteRequest) returns (FavoriteResponse);
 }
 
 // ------ Request

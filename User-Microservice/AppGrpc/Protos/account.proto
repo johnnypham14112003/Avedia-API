@@ -7,16 +7,16 @@ package user_service;
 import "Protos/models.proto";
 
 service AccountGrpcService {
-    rpc GetByPasswordAsync (AuthRequest) returns (AccountResponse);
+    rpc GetByPassword (AuthRequest) returns (AccountResponse);
     rpc GetNewRefreshToken (AccountGetter) returns (AccountResponse);
-    rpc RevokeRefreshTokenAsync (AccountGetter) returns (AccountResponse);
-    rpc ChangePasswordAsync (AuthRequest) returns (AccountResponse);
-	rpc CreateAccountAsync (AuthRequest) returns (AccountResponse);
-    rpc GetAccountAsync (AccountGetter) returns (AccountResponse);
-    rpc GetAccountListAsync(AccountPageRequest) returns (AccountPageResponse);
-    rpc UpdateAccountAsync (AccountRequest) returns (AccountResponse);
-    rpc DeleteAccountAsync (AccountGetter) returns (AccountResponse);
-    rpc DeletePermanentAccountAsync (AccountGetter) returns (AccountResponse);
+    rpc RevokeRefreshToken (AccountGetter) returns (AccountResponse);
+    rpc ChangePassword (AuthRequest) returns (AccountResponse);
+	rpc CreateAccount (AuthRequest) returns (AccountResponse);
+    rpc GetAccount (AccountGetter) returns (AccountResponse);
+    rpc GetAccountList(AccountPageRequest) returns (AccountPageResponse);
+    rpc UpdateAccount (AccountRequest) returns (AccountResponse);
+    rpc DeleteAccount (AccountGetter) returns (AccountResponse);
+    rpc DeletePermanentAccount (AccountGetter) returns (AccountResponse);
 }
 
 // ------ Request

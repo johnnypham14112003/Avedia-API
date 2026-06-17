@@ -7,12 +7,12 @@ package user_service;
 import "Protos/models.proto";
 
 service NotificationGrpcService {
-    rpc CreateGlobalNotificationAsync (NotificationRequest) returns (NotificationResponse);
-    rpc CreatePersonalNotificationAsync (NotificationRequest) returns (NotificationResponse);
-    rpc GetMyNotificationsAsync (NotificationPageRequest) returns (NotificationPageResponse);
-    rpc MarkAsReadAsync (NotificationGetter) returns (NotificationResponse);
-    rpc MarkAllAsReadAsync (NotificationGetter) returns (NotificationResponse);
-    rpc DeleteNotificationAsync (NotificationGetter) returns (NotificationResponse);
+    rpc CreateGlobalNotification (NotificationRequest) returns (NotificationResponse);
+    rpc CreatePersonalNotification (NotificationRequest) returns (NotificationResponse);
+    rpc GetMyNotifications (NotificationPageRequest) returns (NotificationPageResponse);
+    rpc MarkAsRead (NotificationGetter) returns (NotificationResponse);
+    rpc MarkAllAsRead (NotificationGetter) returns (NotificationResponse);
+    rpc DeleteNotification (NotificationGetter) returns (NotificationResponse);
 }
 // ------ Request
 message NotificationRequest {

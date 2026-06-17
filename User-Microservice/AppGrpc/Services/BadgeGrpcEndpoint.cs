@@ -12,7 +12,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
 {
     private readonly IBadgeService _badgeService = badgeService;
 
-    public override async Task<BadgeResponse> AddBadgeToUserAsync(AccountBadgeRequest request, ServerCallContext context)
+    public override async Task<BadgeResponse> AddBadgeToUser(AccountBadgeRequest request, ServerCallContext context)
     {
         var accIsParsed = Guid.TryParse(request.AccountId, out var accId);
         var badgeIsParsed = Guid.TryParse(request.BadgeId, out var badgeId);
@@ -27,7 +27,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
         };
     }
 
-    public override async Task<BadgeResponse> CreateBadgeAsync(BadgeRequest request, ServerCallContext context)
+    public override async Task<BadgeResponse> CreateBadge(BadgeRequest request, ServerCallContext context)
     {
         var result = await _badgeService.CreateBadgeAsync(request.BadgeInfo.Adapt<BadgeRq>());
         return new BadgeResponse
@@ -36,7 +36,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
         };
     }
 
-    public override async Task<BadgeResponse> GetBadgeAsync(BadgeGetter request, ServerCallContext context)
+    public override async Task<BadgeResponse> GetBadge(BadgeGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -50,7 +50,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
         };
     }
 
-    public override async Task<BadgePageResponse> GetBadgesPageAsync(BadgePageRequest request, ServerCallContext context)
+    public override async Task<BadgePageResponse> GetBadgesPage(BadgePageRequest request, ServerCallContext context)
     {
         // For parse DateOnly safety
         DateOnly? parsedFromDate = null;
@@ -124,7 +124,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
         return response;
     }
 
-    public override async Task<BadgeResponse> UpdateBadgeAsync(BadgeRequest request, ServerCallContext context)
+    public override async Task<BadgeResponse> UpdateBadge(BadgeRequest request, ServerCallContext context)
     {
         var result = await _badgeService.UpdateBadgeAsync(request.BadgeInfo.Adapt<BadgeRq>());
         return new BadgeResponse
@@ -133,7 +133,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
         };
     }
 
-    public override async Task<BadgeResponse> DeleteBadgeAsync(BadgeGetter request, ServerCallContext context)
+    public override async Task<BadgeResponse> DeleteBadge(BadgeGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -146,7 +146,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
         };
     }
 
-    public override async Task<BadgeResponse> DeletePermanentBadgeAsync(BadgeGetter request, ServerCallContext context)
+    public override async Task<BadgeResponse> DeletePermanentBadge(BadgeGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -159,7 +159,7 @@ public class BadgeGrpcEndpoint(IBadgeService badgeService) : BadgeGrpcService.Ba
         };
     }
 
-    public override async Task<BadgeResponse> RemoveAllBadgesFromAccountAsync(BadgeGetter request, ServerCallContext context)
+    public override async Task<BadgeResponse> RemoveAllBadgesFromAccount(BadgeGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)

@@ -7,13 +7,13 @@ package user_service;
 import "Protos/models.proto";
 
 service ContributionGrpcService {
-	rpc CreateContributionAsync (ContributionRequest) returns (ContributionResponse);
-	rpc GetContributionAsync (ContributionGetter) returns (ContributionResponse);
-	rpc GetContributionsPageAsync (ContributionPageRequest) returns (ContributionPageResponse);
-	rpc UpdateContributionAsync (ContributionRequest) returns (ContributionResponse);
-	rpc DeleteContributionAsync (ContributionGetter) returns (ContributionResponse);
-	rpc StatusContributionAsync (ContributionGetter) returns (ContributionResponse);
-	rpc ReviewContributionAsync (ContributionGetter) returns (ContributionResponse);
+	rpc CreateContribution (ContributionRequest) returns (ContributionResponse);
+	rpc GetContribution (ContributionGetter) returns (ContributionResponse);
+	rpc GetContributionsPage (ContributionPageRequest) returns (ContributionPageResponse);
+	rpc UpdateContribution (ContributionRequest) returns (ContributionResponse);
+	rpc DeleteContribution (ContributionGetter) returns (ContributionResponse);
+	rpc StatusContribution (ContributionGetter) returns (ContributionResponse);
+	rpc ReviewContribution (ContributionGetter) returns (ContributionResponse);
 }
 
 // ------ Request

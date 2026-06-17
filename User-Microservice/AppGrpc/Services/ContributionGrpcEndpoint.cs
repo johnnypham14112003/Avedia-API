@@ -12,7 +12,7 @@ public class ContributionGrpcEndpoint(IContributionService contributionService) 
 {
     private readonly IContributionService _contributionService = contributionService;
 
-    public override async Task<ContributionResponse> CreateContributionAsync(ContributionRequest request, ServerCallContext context)
+    public override async Task<ContributionResponse> CreateContribution(ContributionRequest request, ServerCallContext context)
     {
         var result = await _contributionService.CreateContributionAsync(request.ContributionInfo.Adapt<ContributionRq>());
         return new ContributionResponse
@@ -21,7 +21,7 @@ public class ContributionGrpcEndpoint(IContributionService contributionService) 
         };
     }
 
-    public override async Task<ContributionResponse> GetContributionAsync(ContributionGetter request, ServerCallContext context)
+    public override async Task<ContributionResponse> GetContribution(ContributionGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -35,7 +35,7 @@ public class ContributionGrpcEndpoint(IContributionService contributionService) 
         };
     }
 
-    public override async Task<ContributionPageResponse> GetContributionsPageAsync(ContributionPageRequest request, ServerCallContext context)
+    public override async Task<ContributionPageResponse> GetContributionsPage(ContributionPageRequest request, ServerCallContext context)
     {
         var pageQuery = request.PageQueryRequest;
         var advanceInput = request.AdvanceInput;
@@ -121,7 +121,7 @@ public class ContributionGrpcEndpoint(IContributionService contributionService) 
         return response;
     }
 
-    public override async Task<ContributionResponse> UpdateContributionAsync(ContributionRequest request, ServerCallContext context)
+    public override async Task<ContributionResponse> UpdateContribution(ContributionRequest request, ServerCallContext context)
     {
         var result = await _contributionService.UpdateContributionAsync(request.ContributionInfo.Adapt<ContributionRq>());
         return new ContributionResponse
@@ -130,7 +130,7 @@ public class ContributionGrpcEndpoint(IContributionService contributionService) 
         };
     }
 
-    public override async Task<ContributionResponse> DeleteContributionAsync(ContributionGetter request, ServerCallContext context)
+    public override async Task<ContributionResponse> DeleteContribution(ContributionGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -143,7 +143,7 @@ public class ContributionGrpcEndpoint(IContributionService contributionService) 
         };
     }
 
-    public override async Task<ContributionResponse> StatusContributionAsync(ContributionGetter request, ServerCallContext context)
+    public override async Task<ContributionResponse> StatusContribution(ContributionGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -159,7 +159,7 @@ public class ContributionGrpcEndpoint(IContributionService contributionService) 
         };
     }
 
-    public override async Task<ContributionResponse> ReviewContributionAsync(ContributionGetter request, ServerCallContext context)
+    public override async Task<ContributionResponse> ReviewContribution(ContributionGetter request, ServerCallContext context)
     {
         if (Guid.TryParse(request.Id, out var contriId) == false || contriId == Guid.Empty)
             return new ContributionResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "Contribution ID invalid!" } };

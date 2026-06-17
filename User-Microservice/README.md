@@ -1,6 +1,5 @@
 ## About
-
-
+A microservice project of Avedia-API system using ASP.NET Core gRPC Service to manage data of User, Contribution Request, Notification, Badge
 
 - **Version:** .NET 10.0
 - **Structure:** 3-Layer Architecture *(App/BusinessLogic/DataAccess)* with Dependency Injection.
@@ -12,17 +11,17 @@
 - [Grpc.AspNetCore](https://www.nuget.org/packages/Grpc.AspNetCore/2.80.0) `2.80.0`
 
 ### BusinessLogic Layer
-- [Mapster](https://www.nuget.org/packages/Mapster/10.0.7) `10.0.7` *(For mapping model classes)*
-- [Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/10.0.8) `10.0.8` *(For LINQ mapping and handling ORM)*
+- [Mapster](https://www.nuget.org/packages/Mapster/10.0.8) `10.0.8` *(For mapping model classes)*
+- [Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/10.0.9) `10.0.9` *(For LINQ mapping and handling ORM)*
 - [LinqKit.Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/LinqKit.Microsoft.EntityFrameworkCore/10.0.11) `10.0.11` *(For building query logic before send to ORM)*
 
-- [Microsoft.EntityFrameworkCore.Relational](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Relational/10.0.8) `10.0.8` *(Fix conflict package version with transitive in DataAccess)*
-- [Microsoft.Extensions.Configuration.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.8) `10.0.8` *(Fix conflict package version with transitive in DataAccess)*
+- [Microsoft.EntityFrameworkCore.Relational](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Relational/10.0.9) `10.0.9` *(Fix conflict package version with transitive in DataAccess)*
+- [Microsoft.Extensions.Configuration.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.9) `10.0.9` *(Fix conflict package version with transitive in DataAccess)*
 
 ### DataAccess Layer
-- [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/10.0.1) `10.0.1`
-- [Microsoft.EntityFrameworkCore.Tools](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools/10.0.8) `10.0.8` *(For scraffold)*
-- [Microsoft.EntityFrameworkCore.Design](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design/10.0.8) `10.0.8` *(For scraffold)*
+- [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/10.0.2) `10.0.2`
+- [Microsoft.EntityFrameworkCore.Tools](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools/10.0.9) `10.0.9` *(For scraffold)*
+- [Microsoft.EntityFrameworkCore.Design](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design/10.0.9) `10.0.9` *(For scraffold)*
 
 ## How to use
 ### Create database and scraffold

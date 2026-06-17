@@ -11,7 +11,7 @@ public class FavoriteGrpcEndpoint(IFavoriteService favoriteService) : FavoriteGr
 {
     private readonly IFavoriteService _favoriteService = favoriteService;
 
-    public override async Task<FavoriteResponse> CheckUserFavoritedAsync(FavoriteRequest request, ServerCallContext context)
+    public override async Task<FavoriteResponse> CheckUserFavorited(FavoriteRequest request, ServerCallContext context)
     {
         var result = await _favoriteService.CheckUserFavoritedAsync(request.FavoriteInfo.Adapt<FavoriteRq>());
 
@@ -20,7 +20,7 @@ public class FavoriteGrpcEndpoint(IFavoriteService favoriteService) : FavoriteGr
             ResultResponse = result.Adapt<ResultResponse>()
         };
     }
-    public override async Task<FavoriteResponse> CountTargetFavoriteAsync(FavoriteRequest request, ServerCallContext context)
+    public override async Task<FavoriteResponse> CountTargetFavorite(FavoriteRequest request, ServerCallContext context)
     {
         var favorite = request.FavoriteInfo;
         var isParsed = Guid.TryParse(favorite.TargetId, out var parsedId);
@@ -34,7 +34,7 @@ public class FavoriteGrpcEndpoint(IFavoriteService favoriteService) : FavoriteGr
             FavoriteNumber = result.Data
         };
     }
-    public override async Task<FavoritePageResponse> GetUserFavoritesAsync(FavoritePageRequest request, ServerCallContext context)
+    public override async Task<FavoritePageResponse> GetUserFavorites(FavoritePageRequest request, ServerCallContext context)
     {
         var pageQuery = request.PageQueryRequest;
         var advanceInput = request.AdvanceInput;
@@ -92,7 +92,7 @@ public class FavoriteGrpcEndpoint(IFavoriteService favoriteService) : FavoriteGr
         return response;
     }
 
-    public override async Task<FavoriteResponse> ToggleFavoriteAsync(FavoriteRequest request, ServerCallContext context)
+    public override async Task<FavoriteResponse> ToggleFavorite(FavoriteRequest request, ServerCallContext context)
     {
         var favorite = request.FavoriteInfo;
         var result = await _favoriteService.ToggleFavoriteAsync(favorite.Adapt<FavoriteRq>());

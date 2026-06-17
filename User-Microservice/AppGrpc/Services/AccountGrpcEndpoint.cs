@@ -12,7 +12,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
 {
     private readonly IAccountService _accountService = accountService;
 
-    public override async Task<AccountResponse> GetByPasswordAsync(AuthRequest request, ServerCallContext context)
+    public override async Task<AccountResponse> GetByPassword(AuthRequest request, ServerCallContext context)
     {
         var result = await _accountService.GetByPasswordAsync(request.Adapt<AuthRq>());
 
@@ -38,7 +38,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
         };
     }
 
-    public override async Task<AccountResponse> RevokeRefreshTokenAsync(AccountGetter request, ServerCallContext context)
+    public override async Task<AccountResponse> RevokeRefreshToken(AccountGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -52,7 +52,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
         };
     }
 
-    public override async Task<AccountResponse> ChangePasswordAsync(AuthRequest request, ServerCallContext context)
+    public override async Task<AccountResponse> ChangePassword(AuthRequest request, ServerCallContext context)
     {
         var result = await _accountService.ChangePasswordAsync(request.Email, request.Password);
 
@@ -62,7 +62,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
         };
     }
 
-    public override async Task<AccountResponse> CreateAccountAsync(AuthRequest request, ServerCallContext context)
+    public override async Task<AccountResponse> CreateAccount(AuthRequest request, ServerCallContext context)
     {
         var result = await _accountService.CreateAccountAsync(request.Adapt<AuthRq>());
 
@@ -72,7 +72,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
         };
     }
 
-    public override async Task<AccountResponse> GetAccountAsync(AccountGetter request, ServerCallContext context)
+    public override async Task<AccountResponse> GetAccount(AccountGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -102,19 +102,19 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
                     AccountBadgeInfo = ab.Adapt<AccountBadgeInfo>(),
 
                     // Get navigation property Badge to map into BadgeInfo (check null before get it and adapt to prevent error)
-                    BadgeInfo = (ab.Badge != null) ? ab.Badge.Adapt<BadgeInfo>() : null
+                    BadgeInfo = ab.Badge?.Adapt<BadgeInfo>()
                 });
 
-                // Because repeated in proto is read-only so can't assign directly.
-                // Use AddRange to put in array repeated of Protobuf
-                response.AccountBadgeResponse.AddRange(mappedAccountBadgesResponse);
-            }
+            // Because repeated in proto is read-only so can't assign directly.
+            // Use AddRange to put in array repeated of Protobuf
+            response.AccountBadgeResponse.AddRange(mappedAccountBadgesResponse);
         }
+    }
 
         return response;
     }
 
-    public override async Task<AccountPageResponse> GetAccountListAsync(AccountPageRequest request, ServerCallContext context)
+    public override async Task<AccountPageResponse> GetAccountList(AccountPageRequest request, ServerCallContext context)
     {
         // For parse DateOnly safety
         DateOnly? parsedFromDate = null;
@@ -192,7 +192,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
         return response;
     }
 
-    public override async Task<AccountResponse> UpdateAccountAsync(AccountRequest request, ServerCallContext context)
+    public override async Task<AccountResponse> UpdateAccount(AccountRequest request, ServerCallContext context)
     {
         var result = await _accountService.UpdateAccountAsync(request.AccountInfo.Adapt<AccountRq>(), request.UpdateAll);
 
@@ -202,7 +202,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
         };
     }
 
-    public override async Task<AccountResponse> DeleteAccountAsync(AccountGetter request, ServerCallContext context)
+    public override async Task<AccountResponse> DeleteAccount(AccountGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)
@@ -216,7 +216,7 @@ public class AccountGrpcEndpoint(IAccountService accountService) : AccountGrpcSe
         };
     }
 
-    public override async Task<AccountResponse> DeletePermanentAccountAsync(AccountGetter request, ServerCallContext context)
+    public override async Task<AccountResponse> DeletePermanentAccount(AccountGetter request, ServerCallContext context)
     {
         var isParsed = Guid.TryParse(request.Id, out var parsedId);
         if (isParsed == false || parsedId == Guid.Empty)

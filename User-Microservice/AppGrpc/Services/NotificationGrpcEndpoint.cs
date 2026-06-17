@@ -14,7 +14,7 @@ public class NotificationGrpcEndpoint(INotificationService notificationService) 
 {
     private readonly INotificationService _notificationService = notificationService;
 
-    public override async Task<NotificationResponse> CreateGlobalNotificationAsync(NotificationRequest request, ServerCallContext context)
+    public override async Task<NotificationResponse> CreateGlobalNotification(NotificationRequest request, ServerCallContext context)
     {
         var result = await _notificationService.CreateGlobalNotificationAsync(request.NotificationInfo.Adapt<NotificationRq>());
 
@@ -24,7 +24,7 @@ public class NotificationGrpcEndpoint(INotificationService notificationService) 
         };
     }
 
-    public override async Task<NotificationResponse> CreatePersonalNotificationAsync(NotificationRequest request, ServerCallContext context)
+    public override async Task<NotificationResponse> CreatePersonalNotification(NotificationRequest request, ServerCallContext context)
     {
         // Save parse GUID
         var guidList = request.ListNotificationId.Select(id =>
@@ -43,7 +43,7 @@ public class NotificationGrpcEndpoint(INotificationService notificationService) 
         };
     }
 
-    public override async Task<NotificationPageResponse> GetMyNotificationsAsync(NotificationPageRequest request, ServerCallContext context)
+    public override async Task<NotificationPageResponse> GetMyNotifications(NotificationPageRequest request, ServerCallContext context)
     {
         // Pre-Validate
         var pageQuery = request.PageQueryRequest;
@@ -123,7 +123,7 @@ public class NotificationGrpcEndpoint(INotificationService notificationService) 
         return response;
     }
 
-    public override async Task<NotificationResponse> MarkAsReadAsync(NotificationGetter request, ServerCallContext context)
+    public override async Task<NotificationResponse> MarkAsRead(NotificationGetter request, ServerCallContext context)
     {
         if (Guid.TryParse(request.AccountId, out var accId) == false || accId == Guid.Empty)
             return new NotificationResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
@@ -138,7 +138,7 @@ public class NotificationGrpcEndpoint(INotificationService notificationService) 
         };
     }
 
-    public override async Task<NotificationResponse> MarkAllAsReadAsync(NotificationGetter request, ServerCallContext context)
+    public override async Task<NotificationResponse> MarkAllAsRead(NotificationGetter request, ServerCallContext context)
     {
         if (Guid.TryParse(request.AccountId, out var accId) == false || accId == Guid.Empty)
             return new NotificationResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
@@ -151,7 +151,7 @@ public class NotificationGrpcEndpoint(INotificationService notificationService) 
         };
     }
 
-    public override async Task<NotificationResponse> DeleteNotificationAsync(NotificationGetter request, ServerCallContext context)
+    public override async Task<NotificationResponse> DeleteNotification(NotificationGetter request, ServerCallContext context)
     {
         if (Guid.TryParse(request.NotificationId, out var notiId) == false || notiId == Guid.Empty)
             return new NotificationResponse { ResultResponse = new ResultResponse { HttpCode = 400, ErrorMessage = "ID invalid!" } };
