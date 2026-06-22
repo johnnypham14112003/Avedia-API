@@ -127,8 +127,9 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
 
     public async Task<ResultRs<PagedResult<AccountRs>>> GetAccountsPageAsync(PagingQueryRq<AccountQr> input)
     {
-        input.PageNumber = input.PageNumber > 0 ? input.PageNumber : 1;
-        input.PageSize = input.PageSize > 0 ? input.PageSize : 10;
+        var pageNumber = input.PageNumber > 0 ? input.PageNumber : 1;
+        var pageSize = input.PageSize > 0 ? input.PageSize : 10;
+        var advanceInput = input.AdvanceInput;
 
         // Query form builder
         var predicate = PredicateBuilder.New<Account>(true);
@@ -140,14 +141,14 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             predicate = predicate.And(a => a.Email.Contains(input.Keyword));
         }
 
-        if (input.AdvanceInput is not null)
+        if (advanceInput is not null)
         {
             // IsVerified
-            if (input.AdvanceInput.IsVerified.HasValue)
-                predicate = predicate.And(a => a.IsVerified == input.AdvanceInput.IsVerified);
+            if (advanceInput.IsVerified.HasValue)
+                predicate = predicate.And(a => a.IsVerified == advanceInput.IsVerified);
 
             // Gender
-            predicate = input.AdvanceInput.Gender switch
+            predicate = advanceInput.Gender switch
             {
                 1 => (ExpressionStarter<Account>)predicate.And(a => a.Gender == true),
                 2 => (ExpressionStarter<Account>)predicate.And(a => a.Gender == false),
@@ -156,31 +157,30 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             };
 
             // Nationality
-            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Nationality))
-                predicate = predicate.And(a => a.Nationality!.Equals(input.AdvanceInput.Nationality));
+            if (!string.IsNullOrWhiteSpace(advanceInput.Nationality))
+                predicate = predicate.And(a => a.Nationality!.Equals(advanceInput.Nationality));
 
             // JoinedDate
-            if (input.AdvanceInput.FromDate.HasValue)
-                predicate = predicate.And(a => a.JoinedDate >= input.AdvanceInput.FromDate);
-            if (input.AdvanceInput.ToDate.HasValue)
-                predicate = predicate.And(a => a.JoinedDate < input.AdvanceInput.ToDate.Value.AddDays(1));
+            if (advanceInput.FromDate.HasValue)
+                predicate = predicate.And(a => a.JoinedDate >= advanceInput.FromDate);
+            if (advanceInput.ToDate.HasValue)
+                predicate = predicate.And(a => a.JoinedDate < advanceInput.ToDate.Value.AddDays(1));
 
             // Role
-            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Role))
-                predicate = predicate.And(a => a.Role.Equals(input.AdvanceInput.Role));
+            if (!string.IsNullOrWhiteSpace(advanceInput.Role))
+                predicate = predicate.And(a => a.Role.Equals(advanceInput.Role));
 
             // Status
-            if (!string.IsNullOrWhiteSpace(input.AdvanceInput.Status))
-                predicate = predicate.And(a => a.Status.Equals(input.AdvanceInput.Status));
+            if (!string.IsNullOrWhiteSpace(advanceInput.Status))
+                predicate = predicate.And(a => a.Status.Equals(advanceInput.Status));
         }
+
+        // Order By Create Date
+        static IQueryable<Account> OrderByDate(IQueryable<Account> query) => query.OrderByDescending(a => a.JoinedDate);
+
         // ------------------------------------------
         var accountRepo = _unitOfWork.GetRepository<Account>();
-        var accounts = (
-            await accountRepo.GetPagedAsync(
-                predicate: predicate,
-                pageNumber: input.PageNumber,
-                pageSize: input.PageSize)
-            ).Adapt<IEnumerable<AccountRs>>();
+        var accounts = await accountRepo.GetPagedAsync(pageNumber, pageSize, predicate, OrderByDate);
 
         return accounts.Any() ?
             ResultRs<PagedResult<AccountRs>>.Ok(
@@ -189,7 +189,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
                     TotalCount = await accountRepo.CountAsync(predicate),
                     PageSize = input.PageSize,
                     PageIndex = input.PageNumber,
-                    DataList = accounts
+                    DataList = accounts.Adapt<IEnumerable<AccountRs>>()
                 }) :
             ResultRs<PagedResult<AccountRs>>.NotFound();
     }
@@ -245,7 +245,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         var existAccount = await accountRepo.GetByIdAsync(id);
         if (existAccount == null)
             return ResultRs<bool>.NotFound("Not found this Id account!");
-        
+
         // Hard Delete
         await _unitOfWork.GetRepository<Account>().DeleteAsync(existAccount);
 

@@ -20,7 +20,7 @@ public class ResultRs<T>
     /// </summary>
     public static ResultRs<bool> OkBool(bool result) => new() { Success = result, HttpCode = 200 };
     public static ResultRs<T> BadRequest(string message = "The request is invalid to handle!") => new() { Success = false, ErrorMessage = message , HttpCode = 400};
-    public static ResultRs<T> NotFound(string message = "Not found the resource!") => new() { Success = false, ErrorMessage = message , HttpCode = 404};
+    public static ResultRs<T> NotFound(string message = "Not found the resource!") => new() { Success = true, ErrorMessage = message , HttpCode = 404};
     public static ResultRs<T> Conflict(string message = "The resource trying to handle is duplicated or cannot be changed") => new() { Success = false, ErrorMessage = message , HttpCode = 409};
     public static ResultRs<T> Failure(string message = "The request was correct, but the server could not save data!") => new() { Success = false, ErrorMessage = message , HttpCode = 422};
 }

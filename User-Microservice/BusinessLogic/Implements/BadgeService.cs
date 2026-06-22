@@ -96,8 +96,12 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
                 predicate = predicate.And(b => b.CreatedDate <= input.AdvanceInput.ToDate);
         }
 
+        // Order By Create Date
+        static IQueryable<Badge> OrderByDate(IQueryable<Badge> query) => query.OrderByDescending(b => b.CreatedDate);
+
+        // Start call Db
         var badgeRepo = _unitOfWork.GetRepository<Badge>();
-        var badges = await badgeRepo.GetPagedAsync(pageNumber, pageSize, predicate);
+        var badges = await badgeRepo.GetPagedAsync(pageNumber, pageSize, predicate, OrderByDate);
 
         return badges.Any() ?
             ResultRs<PagedResult<BadgeRs>>.Ok(

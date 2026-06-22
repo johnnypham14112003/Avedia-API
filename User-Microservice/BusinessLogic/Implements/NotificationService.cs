@@ -116,13 +116,14 @@ public class NotificationService(IUnitOfWork unitOfWork) : INotificationService
                     include: q => q.Include(n => n.AccountNotifications.Where(an => an.AccountId == filter.AccountId)),
                     predicate: predicate);
 
-                // Map AccNoti with NotiRs
+                // -------------------------------
+                // Map AccNoti to NotiRs
                 var mappedNotificationRs = notifications.Select(n =>
                 {
                     // Map basic properties
                     var rs = n.Adapt<NotificationRs>();
 
-                    // If AccNoti null (not read Global -> not create AccNoti) => false
+                    // If AccNoti null (not read Global <=> not create AccNoti) => false
                     rs.IsRead = n.AccountNotifications.FirstOrDefault()?.IsRead ?? false;
 
                     return rs;
@@ -140,8 +141,11 @@ public class NotificationService(IUnitOfWork unitOfWork) : INotificationService
             }
         }
 
+        // Order By Create Date
+        static IQueryable<Notification> OrderByDate(IQueryable<Notification> query) => query.OrderByDescending(n => n.CreatedDate);
+
         // Normal query without Account Id
-        notifications = await notificationRepo.GetPagedAsync(pageNumber, pageSize, predicate);
+        notifications = await notificationRepo.GetPagedAsync(pageNumber, pageSize, predicate, OrderByDate);
 
         return notifications.Any() ? ResultRs<PagedResult<NotificationRs>>.Ok(
             new PagedResult<NotificationRs>
