@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+option csharp_namespace = "GraphQLGateway.Protos";
+
+package user_service;
+
+import "Protos/models.proto";
+
+service ContributionGrpcService {
+	rpc CreateContribution (ContributionRequest) returns (ContributionResponse);
+	rpc GetContribution (ContributionGetter) returns (ContributionResponse);
+	rpc GetContributionsPage (ContributionPageRequest) returns (ContributionPageResponse);
+	rpc UpdateContribution (ContributionRequest) returns (ContributionResponse);
+	rpc DeleteContribution (ContributionGetter) returns (ContributionResponse);
+	rpc StatusContribution (ContributionGetter) returns (ContributionResponse);
+	rpc ReviewContribution (ContributionGetter) returns (ContributionResponse);
+}
+
+// ------ Request
+message ContributionRequest {
+	ContributionInfo contribution_info = 1;
+}
+
+message ContributionGetter {
+	string id = 1;
+	optional string approver_id = 2;
+	optional string new_status = 3;
+}
+
+message ContributionPageRequest {
+    PageQueryRequest page_query_request = 1;
+    ContributionQuery advance_input = 2;
+}
+
+message ContributionQuery {
+    optional string contributor_id = 1;
+    optional string target_id = 2;
+    optional string from_date = 3;
+    optional string to_date = 4;
+    optional bool by_type_date = 5;
+    optional bool admin_approved = 6;
+    optional string status = 7;
+}
+
+// ------ Response
+message ContributionResponse{
+	ResultResponse result_response = 1;
+
+	ContributionInfo contribution_info = 2;
+}
+
+message ContributionPageResponse{
+    ResultResponse result_response = 1;
+
+    message ContributionPagedResult {
+        BasePageResult base_page_result = 1;
+        repeated ContributionInfo data_list = 2; 
+    }
+    ContributionPagedResult paged_data = 2;
+}

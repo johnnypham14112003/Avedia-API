@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+option csharp_namespace = "GraphQLGateway.Protos";
+
+package user_service;
+
+import "Protos/models.proto";
+
+service BadgeGrpcService {
+	rpc AddBadgeToUser (AccountBadgeRequest) returns (BadgeResponse);
+	rpc CreateBadge (BadgeRequest) returns (BadgeResponse);
+	rpc GetBadge (BadgeGetter) returns (BadgeResponse);
+	rpc GetBadgesPage (BadgePageRequest) returns (BadgePageResponse);
+	rpc UpdateBadge (BadgeRequest) returns (BadgeResponse);
+	rpc DeleteBadge (BadgeGetter) returns (BadgeResponse);
+	rpc DeletePermanentBadge (BadgeGetter) returns (BadgeResponse);
+	rpc RemoveAllBadgesFromAccount (BadgeGetter) returns (BadgeResponse);
+}
+
+// ------ Request
+message BadgeRequest {
+	BadgeInfo badge_info = 1;
+}
+
+message AccountBadgeRequest {
+    string account_id = 1;
+    string badge_id = 2;
+}
+
+message BadgeGetter {
+	string id = 1;
+}
+
+message BadgePageRequest {
+    PageQueryRequest page_query_request = 1;
+    BadgeQuery advance_input = 2;
+}
+
+message BadgeQuery {
+    optional int32 rare_level = 1;
+    optional string from_date = 2;
+    optional string to_date = 3;
+    optional string status = 4;
+}
+
+// ------ Response
+message BadgeResponse{
+	ResultResponse result_response = 1;
+
+	BadgeInfo badge_info = 2;
+}
+
+message BadgePageResponse{
+    ResultResponse result_response = 1;
+
+    message BadgePagedResult {
+        BasePageResult base_page_result = 1;
+        repeated BadgeInfo data_list = 2; 
+    }
+    BadgePagedResult paged_data = 2;
+}
