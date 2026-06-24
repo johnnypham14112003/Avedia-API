@@ -26,24 +26,23 @@ public class BadgeQueries
         return response.BadgeInfo.Adapt<BadgeRs>();
     }
 
-    public async Task<PagedResult<BadgeRs>> GetBadgesPageAsync(string? keyword, int pageNumber, int pageSize,
-        BadgeQr? badgeQr,
+    public async Task<PagedResult<BadgeRs>> GetBadgesPageAsync(PagingQueryRq<BadgeQr?> input,
         BadgeGrpcService.BadgeGrpcServiceClient grpcClient)
     {
         // Basic Validate
-        if (pageNumber < 1) pageNumber = 1;
-        if (pageSize < 1) pageSize = 10;
+        var pageNumber = input.PageNumber > 0 ? input.PageNumber : 1;
+        var pageSize = input.PageSize > 0 ? input.PageSize : 10;
 
         // Create gRPC input
         var request = new BadgePageRequest
         {
             PageQueryRequest = new PageQueryRequest
             {
-                Keyword = keyword ?? string.Empty,
+                Keyword = input.Keyword ?? string.Empty,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             },
-            AdvanceInput = badgeQr.Adapt<BadgeQuery>()
+            AdvanceInput = input.AdvanceInput.Adapt<BadgeQuery>()
         };
 
         // Call gRPC
@@ -57,7 +56,7 @@ public class BadgeQueries
             PageSize = response.PagedData.BasePageResult.PageSize,
             TotalCount = response.PagedData.BasePageResult.TotalCount,
             TotalPage = response.PagedData.BasePageResult.TotalPage,
-            // Map gRPC message (AccountInfo) to GraphQL model (AccountRs)
+            // Map gRPC message (BadgeInfo) to GraphQL model (BadgeRs)
             DataList = [.. response.PagedData.DataList.Select(x => x.Adapt<BadgeRs>())]
         };
     }

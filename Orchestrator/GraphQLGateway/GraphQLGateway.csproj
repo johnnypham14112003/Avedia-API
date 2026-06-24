@@ -32,7 +32,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Modules\Badges\" />
 		<Folder Include="Modules\Favorites\" />
 		<Folder Include="Modules\Contributions\" />
 		<Folder Include="Modules\Notifications\" />

@@ -70,24 +70,23 @@ public class AccountQueries
         return result;
     }
 
-    public async Task<PagedResult<AccountRs>> GetAccountsAsync(string? keyword, int pageNumber, int pageSize,
-        AccountQr? accountQr,
+    public async Task<PagedResult<AccountRs>> GetAccountsAsync(PagingQueryRq<AccountQr?> input,
         AccountGrpcService.AccountGrpcServiceClient grpcClient)
     {
         // Basic Validate
-        if (pageNumber < 1) pageNumber = 1;
-        if (pageSize < 1) pageSize = 10;
+        var pageNumber = input.PageNumber > 0 ? input.PageNumber : 1;
+        var pageSize = input.PageSize > 0 ? input.PageSize : 10;
 
         // Create gRPC input
         var request = new AccountPageRequest
         {
             PageQueryRequest = new PageQueryRequest
             {
-                Keyword = keyword ?? string.Empty,
+                Keyword = input.Keyword ?? string.Empty,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             },
-            AdvanceInput = accountQr.Adapt<AccountQuery>()
+            AdvanceInput = input.AdvanceInput.Adapt<AccountQuery>()
         };
 
         // Call gRPC
