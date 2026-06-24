@@ -1,6 +1,8 @@
 ﻿using GraphQLGateway.Protos;
-using GraphQLGateway.Modules.Accounts;
 using Microsoft.AspNetCore.RateLimiting;
+using GraphQLGateway.Modules.Accounts;
+using GraphQLGateway.Modules.Badges;
+using GraphQLGateway.Modules.Contributions;
 
 namespace GraphQLGateway;
 
@@ -37,7 +39,11 @@ public static class DIContainer
             .AddQueryType(d => d.Name(OperationTypeNames.Query))
             .AddMutationType(d => d.Name(OperationTypeNames.Mutation))
             .AddTypeExtension<AccountQueries>()
-            .AddTypeExtension<AccountMutations>();
+            .AddTypeExtension<AccountMutations>()
+            .AddTypeExtension<BadgeQueries>()
+            .AddTypeExtension<BadgeMutations>()
+            .AddTypeExtension<ContributionQueries>()
+            .AddTypeExtension<ContributionMutations>();
         // .AddTypeExtension<ProductQueries>() ..
         return services;
     }
