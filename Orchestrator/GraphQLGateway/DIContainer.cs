@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using GraphQLGateway.Modules.Accounts;
 using GraphQLGateway.Modules.Badges;
 using GraphQLGateway.Modules.Contributions;
+using GraphQLGateway.Modules.Favorites;
 
 namespace GraphQLGateway;
 
@@ -43,7 +44,9 @@ public static class DIContainer
             .AddTypeExtension<BadgeQueries>()
             .AddTypeExtension<BadgeMutations>()
             .AddTypeExtension<ContributionQueries>()
-            .AddTypeExtension<ContributionMutations>();
+            .AddTypeExtension<ContributionMutations>()
+            .AddTypeExtension<FavoriteQueries>()
+            .AddTypeExtension<FavoriteMutations>();
         // .AddTypeExtension<ProductQueries>() ..
         return services;
     }

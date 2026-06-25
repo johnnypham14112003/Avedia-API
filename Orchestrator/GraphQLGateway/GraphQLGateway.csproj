@@ -32,7 +32,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Modules\Favorites\" />
 		<Folder Include="Modules\Notifications\" />
 		<Folder Include="Extensions\" />
 	</ItemGroup>
