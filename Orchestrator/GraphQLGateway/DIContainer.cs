@@ -4,6 +4,7 @@ using GraphQLGateway.Modules.Accounts;
 using GraphQLGateway.Modules.Badges;
 using GraphQLGateway.Modules.Contributions;
 using GraphQLGateway.Modules.Favorites;
+using GraphQLGateway.Modules.Notifications;
 
 namespace GraphQLGateway;
 
@@ -46,7 +47,9 @@ public static class DIContainer
             .AddTypeExtension<ContributionQueries>()
             .AddTypeExtension<ContributionMutations>()
             .AddTypeExtension<FavoriteQueries>()
-            .AddTypeExtension<FavoriteMutations>();
+            .AddTypeExtension<FavoriteMutations>()
+            .AddTypeExtension<NotificationQueries>()
+            .AddTypeExtension<NotificationMutations>();
         // .AddTypeExtension<ProductQueries>() ..
         return services;
     }
