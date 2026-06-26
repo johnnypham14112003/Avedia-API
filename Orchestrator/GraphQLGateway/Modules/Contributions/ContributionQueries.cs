@@ -1,5 +1,4 @@
 ﻿using GraphQLGateway.DTOs.Generic;
-using GraphQLGateway.DTOs.Request;
 using GraphQLGateway.DTOs.Request.Query;
 using GraphQLGateway.DTOs.Response;
 using GraphQLGateway.Protos;
@@ -21,7 +20,7 @@ public class ContributionQueries
 
         // Call gRPC
         var response = await grpcClient.GetContributionAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ContributionInfo.Adapt<ContributionRs>();
@@ -49,7 +48,7 @@ public class ContributionQueries
 
         // Call gRPC
         var response = await grpcClient.GetContributionsPageAsync(request);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return new PagedResult<ContributionRs>

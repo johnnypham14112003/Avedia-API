@@ -12,7 +12,7 @@ public class AccountMutations
     {
         // Call gRPC
         var response = await grpcClient.RevokeRefreshTokenAsync(new AccountGetter { Id = accountId.ToString() });
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -23,7 +23,7 @@ public class AccountMutations
     {
         // Call gRPC
         var response = await grpcClient.ChangePasswordAsync(request.Adapt<AuthRequest>());
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -34,7 +34,7 @@ public class AccountMutations
     {
         // Call gRPC
         var response = await grpcClient.CreateAccountAsync(request.Adapt<AuthRequest>());
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -46,7 +46,7 @@ public class AccountMutations
     {
         // Call gRPC
         var response = await grpcClient.UpdateAccountAsync(request.Adapt<AccountRequest>());
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -57,7 +57,7 @@ public class AccountMutations
     {
         // Call gRPC
         var response = await grpcClient.DeleteAccountAsync(new AccountGetter { Id = id.ToString() });
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -68,7 +68,7 @@ public class AccountMutations
     {
         // Call gRPC
         var response = await grpcClient.DeletePermanentAccountAsync(new AccountGetter { Id = id.ToString() });
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;

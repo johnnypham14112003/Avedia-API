@@ -18,7 +18,7 @@ public class FavoriteMutations
 
         // Call gRPC
         var response = await grpcClient.CheckUserFavoritedAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -35,7 +35,7 @@ public class FavoriteMutations
 
         // Call gRPC
         var response = await grpcClient.CountTargetFavoriteAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.FavoriteNumber;
@@ -52,7 +52,7 @@ public class FavoriteMutations
 
         // Call gRPC
         var response = await grpcClient.ToggleFavoriteAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;

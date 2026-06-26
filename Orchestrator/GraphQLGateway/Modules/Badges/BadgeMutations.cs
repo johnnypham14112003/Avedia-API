@@ -18,7 +18,7 @@ public class BadgeMutations
 
         // Call gRPC
         var response = await grpcClient.CreateBadgeAsync(badgeRequest);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -29,7 +29,7 @@ public class BadgeMutations
     {
         // Call gRPC
         var response = await grpcClient.AddBadgeToUserAsync(request.Adapt<AccountBadgeRequest>());
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -46,7 +46,7 @@ public class BadgeMutations
 
         // Call gRPC
         var response = await grpcClient.UpdateBadgeAsync(badgeRequest);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -63,7 +63,7 @@ public class BadgeMutations
 
         // Call gRPC
         var response = await grpcClient.DeleteBadgeAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -79,7 +79,7 @@ public class BadgeMutations
 
         // Call gRPC
         var response = await grpcClient.DeletePermanentBadgeAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -95,7 +95,7 @@ public class BadgeMutations
 
         // Call gRPC
         var response = await grpcClient.RemoveAllBadgesFromAccountAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;

@@ -20,7 +20,7 @@ public class BadgeQueries
 
         // Call gRPC
         var response = await grpcClient.GetBadgeAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.BadgeInfo.Adapt<BadgeRs>();
@@ -47,7 +47,7 @@ public class BadgeQueries
 
         // Call gRPC
         var response = await grpcClient.GetBadgesPageAsync(request);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return new PagedResult<BadgeRs>

@@ -15,7 +15,7 @@ public class AccountQueries
     {
         // Call gRPC
         var response = await grpcClient.GetByPasswordAsync(request.Adapt<AuthRequest>());
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.AccountInfo.Adapt<AccountRs>();
@@ -26,7 +26,7 @@ public class AccountQueries
     {
         // Call gRPC
         var response = await grpcClient.GetByPasswordAsync(request.Adapt<AuthRequest>());
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.AccountInfo.Adapt<AccountRs>();
@@ -44,7 +44,7 @@ public class AccountQueries
 
         // Call gRPC
         var response = await grpcClient.GetAccountAsync(request);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
 
@@ -91,7 +91,7 @@ public class AccountQueries
 
         // Call gRPC
         var response = await grpcClient.GetAccountListAsync(request);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
 

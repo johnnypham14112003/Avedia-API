@@ -30,7 +30,7 @@ public class FavoriteQueries
 
         // Call gRPC
         var response = await grpcClient.GetUserFavoritesAsync(request);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return new PagedResult<FavoriteRs>

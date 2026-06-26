@@ -18,7 +18,7 @@ public class ContributionMutations
 
         // Call gRPC
         var response = await grpcClient.CreateContributionAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -35,7 +35,7 @@ public class ContributionMutations
 
         // Call gRPC
         var response = await grpcClient.UpdateContributionAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -52,7 +52,7 @@ public class ContributionMutations
 
         // Call gRPC
         var response = await grpcClient.DeleteContributionAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -70,7 +70,7 @@ public class ContributionMutations
 
         // Call gRPC
         var response = await grpcClient.StatusContributionAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
@@ -88,7 +88,7 @@ public class ContributionMutations
 
         // Call gRPC
         var response = await grpcClient.ReviewContributionAsync(input);
-        if (!response.ResultResponse.Success)
+        if (response.ResultResponse.HttpCode != 200)
             throw new GraphQLException(response.ResultResponse.ErrorMessage);
 
         return response.ResultResponse.Success;
