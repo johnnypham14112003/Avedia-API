@@ -137,8 +137,9 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         // ------------------------------------------
         if (!string.IsNullOrWhiteSpace(input.Keyword))
         {
-            predicate = predicate.And(a => a.UserName.Contains(input.Keyword));
-            predicate = predicate.And(a => a.Email.Contains(input.Keyword));
+            // Replace Contain() to use GIN pg_trgm
+            predicate = predicate.And(a => EF.Functions.ILike(a.UserName, $"%{input.Keyword}%"));
+            predicate = predicate.And(a => EF.Functions.ILike(a.Email, $"%{input.Keyword}%"));
         }
 
         if (advanceInput is not null)

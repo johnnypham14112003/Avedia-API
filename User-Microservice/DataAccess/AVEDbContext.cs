@@ -29,12 +29,11 @@ public partial class AVEDbContext : DbContext
     public virtual DbSet<Favorite> Favorites { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
             .HasPostgresExtension("pg_trgm")
-            .HasAnnotation("Npgsql:CollationDefinition:public.case_insensitive", "und-u-ks-level2,und-u-ks-level2,icu,False");
+            .HasAnnotation("Npgsql:CollationDefinition:public.case_insensitive", "und-u-ks-level1,und-u-ks-level1,icu,False");
 
         modelBuilder.Entity<Account>(entity =>
         {
@@ -208,9 +207,21 @@ public partial class AVEDbContext : DbContext
 
             entity.ToTable("contributions");
 
+            entity.HasIndex(e => e.ActionType, "idx_contributions_action_type_trgm")
+                .HasMethod("gin")
+                .HasOperators(new[] { "gin_trgm_ops" })
+                .UseCollation(new[] { "case_insensitive" });
+
             entity.HasIndex(e => e.ContributorId, "idx_contributions_contributor_id");
 
             entity.HasIndex(e => e.Status, "idx_contributions_status").UseCollation(new[] { "case_insensitive" });
+
+            entity.HasIndex(e => e.TargetId, "idx_contributions_target_id");
+
+            entity.HasIndex(e => e.TargetType, "idx_contributions_target_type_trgm")
+                .HasMethod("gin")
+                .HasOperators(new[] { "gin_trgm_ops" })
+                .UseCollation(new[] { "case_insensitive" });
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
@@ -258,6 +269,8 @@ public partial class AVEDbContext : DbContext
 
             entity.HasIndex(e => e.AccountId, "idx_favorites_account_id");
 
+            entity.HasIndex(e => e.TargetId, "idx_favorites_target_id");
+
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
@@ -279,6 +292,11 @@ public partial class AVEDbContext : DbContext
 
             entity.ToTable("notifications");
 
+            entity.HasIndex(e => e.Title, "idx_notifications_title_trgm")
+                .HasMethod("gin")
+                .HasOperators(new[] { "gin_trgm_ops" })
+                .UseCollation(new[] { "case_insensitive" });
+
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
@@ -289,6 +307,7 @@ public partial class AVEDbContext : DbContext
             entity.Property(e => e.Message).HasColumnName("message");
             entity.Property(e => e.Title)
                 .HasMaxLength(50)
+                .UseCollation("case_insensitive")
                 .HasColumnName("title");
             entity.Property(e => e.Type)
                 .HasMaxLength(30)

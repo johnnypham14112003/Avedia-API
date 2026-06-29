@@ -8,6 +8,7 @@ using DataAccess.Interfaces;
 using DataAccess.Models;
 using LinqKit;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Implements;
 
@@ -57,8 +58,9 @@ public class ContributionService(IUnitOfWork unitOfWork) : IContributionService
         // 1. By keyword
         if (!string.IsNullOrWhiteSpace(input.Keyword))
         {
-            predicate = predicate.And(c => c.TargetType.Contains(input.Keyword)
-                                        || c.ActionType.Contains(input.Keyword));
+            // Replace Contain() to use GIN pg_trgm
+            predicate = predicate.And(c => EF.Functions.ILike(c.TargetType, $"%{input.Keyword}%")
+                                        || EF.Functions.ILike(c.ActionType, $"%{input.Keyword}%"));
         }
 
         if (advanceInput is not null)

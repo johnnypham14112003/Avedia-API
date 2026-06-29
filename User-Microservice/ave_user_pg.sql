@@ -1,6 +1,6 @@
--- DROP DATABASE IF EXISTS avedia WITH (FORCE);
+-- DROP DATABASE IF EXISTS avedia_user WITH (FORCE);
 
--- CREATE DATABASE avedia;
+-- CREATE DATABASE avedia_user;
 
 -- SHOW TIMEZONE;
 
@@ -10,7 +10,7 @@
 -- Create COLLATION for "string" ignoring case
 CREATE COLLATION IF NOT EXISTS case_insensitive (
     provider = icu,
-    locale = 'und-u-ks-level2',
+    locale = 'und-u-ks-level1',
     deterministic = false
 );
 --======================[ USER SERVICE ]======================

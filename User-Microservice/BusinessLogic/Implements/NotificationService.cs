@@ -81,8 +81,8 @@ public class NotificationService(IUnitOfWork unitOfWork) : INotificationService
 
         // Search by keyword
         if (!string.IsNullOrWhiteSpace(query.Keyword))
-            predicate = predicate.And(n => n.Title.Contains(query.Keyword));
-
+            predicate = predicate.And(n => EF.Functions.ILike(n.Title, $"%{query.Keyword}%"));// Replace Contain() to use GIN pg_trgm
+        
         // If have filter
         if (filter is not null)
         {

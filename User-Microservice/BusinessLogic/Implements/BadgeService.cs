@@ -8,6 +8,7 @@ using DataAccess.Interfaces;
 using DataAccess.Models;
 using LinqKit;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Implements;
 
@@ -77,7 +78,7 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
         // Query form builder
         var predicate = PredicateBuilder.New<Badge>(true);
         if (!string.IsNullOrWhiteSpace(input.Keyword))
-            predicate = predicate.And(b => b.Title.Contains(input.Keyword));
+            predicate = predicate.And(b => EF.Functions.ILike(b.Title, $"%{input.Keyword}%"));// Replace Contain() to use GIN pg_trgm
 
         if (input.AdvanceInput is not null)
         {
