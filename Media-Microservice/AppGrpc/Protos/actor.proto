@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+option csharp_namespace = "AppGrpc.Protos";
+
+package media_service;
+
+import "Protos/models.proto";
+
+service ActorGrpcService {
+    rpc CreateActor (ActorRequest) returns (ActorResponse);
+    rpc GetActorDetail (ActorGetter) returns (ActorResponse);
+    rpc GetActorsPage (ActorPageRequest) returns (ActorPageResponse);
+    rpc UpdateActor (ActorRequest) returns (ActorResponse);
+	rpc DeleteActor (ActorGetter) returns (ActorResponse);
+}
+
+// ------ Request
+message ActorRequest {
+    ActorInfo actor_info = 1;
+}
+
+message ActorGetter {
+    string id = 1;
+}
+
+message ActorQuery {
+    optional bool gender = 1;
+    optional string height = 2;
+    optional string year_of_birth = 3;
+    optional string size = 4;
+    optional string from_debut_date = 5;
+    optional string to_debut_date = 6;
+    optional string nationality = 7;
+    optional string company = 8;
+    optional string status = 9;
+    optional int32 order_by = 10;
+}
+
+message ActorPageRequest {
+    PageQueryRequest page_query_request = 1;
+    ActorQuery advance_input = 2;
+}
+
+// ------ Response
+message ActorResponse {
+    ResultResponse result_response = 1;
+
+    // Below is optional return (can be nullable)
+    ActorInfo actor_info = 2;
+}
+
+message ActorPageResponse{
+    ResultResponse result_response = 1;
+
+    message ActorPagedResult {
+        BasePageResult base_page_result = 1;
+        repeated ActorInfo data_list = 2; 
+    }
+    ActorPagedResult paged_data = 2;
+}

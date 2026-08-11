@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option csharp_namespace = "AppGrpc.Protos";
+
+import "google/protobuf/timestamp.proto";
+
+// This proto file is created to help mapping nested model message from actual model data return (Circular Import)
+message ResultResponse {
+    bool success = 1;
+    optional string error_message = 2;
+    int32 http_code = 3;
+}
+
+message PageQueryRequest {
+    optional string keyword = 1;
+    int32 page_number = 2;
+    int32 page_size = 3;
+}
+
+message BasePageResult {
+    int32 page_index = 1;
+    int32 page_size = 2;
+    int32 total_count = 3;
+    int32 total_page = 4;
+}
+
+/* - If a composite model has value that need to return, then declare it here and use it.
+   - Otherwise, declare list<object model> directly instead of the <composite object> */
+message ActorInfo {
+    string id = 1;
+    optional string avatar_url = 2;
+    string full_name = 3;
+    optional string stage_name = 4;
+    optional bool gender = 5;
+    optional string dob = 6;
+    optional string bio = 7;
+    optional string height = 8;
+    optional string cup_size = 9;
+    optional string size = 10;
+    optional string debut_date = 11;
+    optional string nationality = 12;
+    optional string company = 13;
+    optional string status = 14;
+}
+
+message GenreInfo {
+    string id = 1;
+    string title = 2;
+    optional string description = 3;
+    optional string status = 4;
+}

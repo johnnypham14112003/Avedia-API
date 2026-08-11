@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="AppGrpc/AppGrpc.csproj" />
+  <Project Path="BusinessLogic/BusinessLogic.csproj" />
+  <Project Path="DataAccess/DataAccess.csproj" />
 </Solution>
