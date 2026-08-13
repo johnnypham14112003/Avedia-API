@@ -26,9 +26,9 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         Expression<Func<T, bool>> predicate,
         Func<IQueryable<T>, IQueryable<T>>? include = null,
         bool hasTracking = false,
-        bool useSplitQuery = false)
+        bool asSplitQuery = false)
     {
-        return await BuildQuery(predicate, include, hasTracking, useSplitQuery).ToListAsync();
+        return await BuildQuery(predicate, include, hasTracking, asSplitQuery).ToListAsync();
     }
 
     public async Task<List<TResult>?> GetListAsync<TResult>(
@@ -36,18 +36,19 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         Expression<Func<T, TResult>> selector,
         Func<IQueryable<T>, IQueryable<T>>? include = null,
         bool hasTracking = false,
-        bool useSplitQuery = false)
+        bool asSplitQuery = false)
     {
-        var query = BuildQuery(predicate, include, hasTracking, useSplitQuery);
+        var query = BuildQuery(predicate, include, hasTracking, asSplitQuery);
         return await query.Select(selector).ToListAsync();
     }
 
     public async Task<IEnumerable<T>> GetPagedAsync(
         int pageNumber, int pageSize,
         Expression<Func<T, bool>>? predicate = null,
-        Func<IQueryable<T>, IQueryable<T>>? include = null)
+        Func<IQueryable<T>, IQueryable<T>>? include = null,
+        bool asSplitQuery = false)
     {
-        var query = BuildQuery(predicate, include, hasTracking: false);
+        var query = BuildQuery(predicate, include, hasTracking: false, asSplitQuery);
 
         pageNumber = pageNumber < 1 ? 1 : pageNumber;
         pageSize = pageSize < 1 ? 10 : pageSize;
@@ -58,8 +59,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task<T?> GetOneAsync(
         Expression<Func<T, bool>> expression,
         Func<IQueryable<T>, IQueryable<T>>? include = null,
-        bool hasTracking = true)
-    => await BuildQuery(expression, include, hasTracking).FirstOrDefaultAsync();
+        bool hasTracking = true, bool asSplitQuery = false)
+    => await BuildQuery(expression, include, hasTracking, asSplitQuery).FirstOrDefaultAsync();
 
     public async Task<T?> GetByIdAsync<Tkey>(Tkey id) => await _dbSet.FindAsync(id);
 

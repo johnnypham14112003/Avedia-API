@@ -44,7 +44,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
 
     public async Task<ResultRs<AccountRs>> RefreshTokenAsync(Guid id, string refreshToken)
     {
-        var account = await _unitOfWork.GetRepository<Account>().GetOneAsync(u => u.Id == id);
+        var account = await _unitOfWork.GetRepository<Account>().GetByIdAsync(id);
 
         // Validate for refreshing expired access token
         if (account is null || account.RefreshToken != refreshToken || account.RefreshTokenExpirytime <= DateTime.Now)
@@ -117,7 +117,8 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
             : await _unitOfWork.GetRepository<Account>().GetOneAsync(
                 a => a.Id == id,
                 q => q.Include(a => a.AccountBadges).ThenInclude(ab => ab.Badge),
-                hasTracking: false
+                hasTracking: false,
+                asSplitQuery: true
             );
 
         if (account is null) return ResultRs<AccountRs>.NotFound("Not found this account match id!");
@@ -199,7 +200,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
     {
         var accountRepo = _unitOfWork.GetRepository<Account>();
 
-        var existAccount = await accountRepo.GetOneAsync(a => a.Id == request.Id, hasTracking: true);
+        var existAccount = await accountRepo.GetByIdAsync(request.Id);
 
         if (existAccount == null) return ResultRs<bool>.NotFound("Not found this Id account!");
 

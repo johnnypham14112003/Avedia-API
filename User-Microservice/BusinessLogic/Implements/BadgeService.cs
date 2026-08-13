@@ -120,7 +120,7 @@ public class BadgeService(IUnitOfWork unitOfWork) : IBadgeService
     {
         var badgeRepo = _unitOfWork.GetRepository<Badge>();
 
-        var existBadge = await badgeRepo.GetOneAsync(b => b.Id == request.Id, hasTracking: true);
+        var existBadge = await badgeRepo.GetByIdAsync(request.Id);
         if (existBadge is null)
             return ResultRs<bool>.NotFound("Not found this Id badge!");
 

@@ -134,7 +134,7 @@ public class ContributionService(IUnitOfWork unitOfWork) : IContributionService
         var contributionRepo = _unitOfWork.GetRepository<Contribution>();
 
         // Query model need update
-        var existContribution = await contributionRepo.GetOneAsync(c => c.Id == request.Id, hasTracking: true);
+        var existContribution = await contributionRepo.GetByIdAsync(request.Id);
         if (existContribution == null)
             return ResultRs<bool>.NotFound("Not found this Id contribution!");
 
@@ -200,7 +200,7 @@ public class ContributionService(IUnitOfWork unitOfWork) : IContributionService
     public async Task<ResultRs<bool>> ReviewContributionAsync(Guid contributionId, Guid approverId)
     {
         var contributionRepo = _unitOfWork.GetRepository<Contribution>();
-        var existContribution = await contributionRepo.GetOneAsync(c => c.Id == contributionId, hasTracking: true);
+        var existContribution = await contributionRepo.GetByIdAsync(contributionId);
         if (existContribution == null)
             return ResultRs<bool>.NotFound("Not found this Id contribution!");
 
