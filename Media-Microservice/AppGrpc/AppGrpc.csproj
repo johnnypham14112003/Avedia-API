@@ -17,6 +17,7 @@
 	<ItemGroup>
 		<Protobuf Include="Protos\models.proto" GrpcServices="none" />
 		<Protobuf Include="Protos\actor.proto" GrpcServices="Server" />
+		<Protobuf Include="Protos\genre.proto" GrpcServices="Server" />
 	</ItemGroup>
 
 	<ItemGroup>

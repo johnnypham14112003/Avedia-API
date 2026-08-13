@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option csharp_namespace = "AppGrpc.Protos";
+
+package media_service;
+
+import "Protos/models.proto";
+
+service GenreGrpcService {
+    rpc CreateGenre (GenreRequest) returns (GenreResponse);
+    rpc GetGenreDetail (GenreGetter) returns (GenreResponse);
+    rpc GetGenresList (GenreGetter) returns (GenreListResponse);
+    rpc UpdateGenre (GenreRequest) returns (GenreResponse);
+	rpc DeleteGenre (GenreGetter) returns (GenreResponse);
+}
+
+// ------ Request
+message GenreRequest {
+    GenreInfo genre_info = 1;
+}
+
+message GenreGetter {
+    optional string id = 1;
+    optional bool include_delete = 2;
+}
+
+// ------ Response
+message GenreResponse {
+    ResultResponse result_response = 1;
+
+    // Below is optional return (can be nullable)
+    GenreInfo genre_info = 2;
+}
+
+message GenreListResponse{
+    ResultResponse result_response = 1;
+
+    repeated GenreInfo data_list = 2;
+}

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS actors (
 	debut_date DATE,
 	nationality VARCHAR(100) COLLATE "case_insensitive",
 	company VARCHAR(200) COLLATE "case_insensitive",
-	status VARCHAR(30) COLLATE "case_insensitive"
+	status VARCHAR(30) NOT NULL DEFAULT 'Created' COLLATE "case_insensitive"
 );
 
 CREATE TABLE IF NOT EXISTS videos (
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS genres (
 	"id" UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	title VARCHAR(50) NOT NULL UNIQUE COLLATE "case_insensitive",
 	description TEXT,
-	status VARCHAR(30) COLLATE "case_insensitive"
+	status VARCHAR(30) NOT NULL DEFAULT 'Created' COLLATE "case_insensitive"
 );
 
 CREATE TABLE IF NOT EXISTS producers (
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS producers (
 	description TEXT,
 	establish_date DATE, --as company
 	country VARCHAR(100) COLLATE "case_insensitive",
-	status VARCHAR(30) COLLATE "case_insensitive"
+	status VARCHAR(30) NOT NULL DEFAULT 'Created' COLLATE "case_insensitive"
 );
 
 CREATE TABLE IF NOT EXISTS labels (
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS images (
 	locale_path TEXT,
 	url TEXT NOT NULL,
 	upload_date DATE NOT NULL DEFAULT CURRENT_DATE,
-	status VARCHAR(30) COLLATE "case_insensitive"
+	status VARCHAR(30) NOT NULL DEFAULT 'Created' COLLATE "case_insensitive"
 );
 
 --======================[ N:N RELATIONSHIP ]======================
