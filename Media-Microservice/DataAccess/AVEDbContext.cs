@@ -87,6 +87,7 @@ public partial class AVEDbContext : DbContext
                 .HasColumnName("stage_name");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
+                .HasDefaultValueSql("'Created'::character varying")
                 .UseCollation("case_insensitive")
                 .HasColumnName("status");
         });
@@ -136,6 +137,7 @@ public partial class AVEDbContext : DbContext
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
+                .HasDefaultValueSql("'Created'::character varying")
                 .UseCollation("case_insensitive")
                 .HasColumnName("status");
             entity.Property(e => e.Title)
@@ -156,6 +158,7 @@ public partial class AVEDbContext : DbContext
             entity.Property(e => e.LocalePath).HasColumnName("locale_path");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
+                .HasDefaultValueSql("'Created'::character varying")
                 .UseCollation("case_insensitive")
                 .HasColumnName("status");
             entity.Property(e => e.UploadDate)
@@ -213,6 +216,7 @@ public partial class AVEDbContext : DbContext
                 .HasColumnName("other_name");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
+                .HasDefaultValueSql("'Created'::character varying")
                 .UseCollation("case_insensitive")
                 .HasColumnName("status");
         });

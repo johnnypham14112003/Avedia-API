@@ -29,7 +29,7 @@ public partial class Actor
 
     public string? Company { get; set; }
 
-    public string? Status { get; set; }
+    public string Status { get; set; } = null!;
 
     public virtual ICollection<ActorImage> ActorImages { get; set; } = new List<ActorImage>();
 
