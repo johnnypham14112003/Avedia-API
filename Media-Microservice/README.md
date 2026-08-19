@@ -8,22 +8,22 @@ A microservice project of Avedia-API system using ASP.NET Core gRPC Service to m
 ## Packages
 ### App Layer
 - [DotNetEnv](https://www.nuget.org/packages/DotNetEnv/3.2.0) `3.2.0` *(For loading env file)*
-- [Grpc.AspNetCore](https://www.nuget.org/packages/Grpc.AspNetCore/2.80.0) `2.80.0`
+- [Grpc.AspNetCore](https://www.nuget.org/packages/Grpc.AspNetCore/2.83.0) `2.83.0`
 
 ### BusinessLogic Layer
 - [Mapster](https://www.nuget.org/packages/Mapster/10.0.11) `10.0.11` *(For mapping model classes)*
-- [Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/10.0.10) `10.0.10` *(For LINQ mapping and handling ORM)*
+- [Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/10.0.11) `10.0.11` *(For LINQ mapping and handling ORM)*
 - [LinqKit.Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/LinqKit.Microsoft.EntityFrameworkCore/10.0.11) `10.0.11` *(For building query logic before send to ORM)*
 
-- [Microsoft.EntityFrameworkCore.Relational](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Relational/10.0.10) `10.0.10` *(Fix conflict package version with transitive in DataAccess)*
-- [Microsoft.Extensions.Configuration.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.10) `10.0.10` *(Fix conflict package version with transitive in DataAccess)*
+- [Microsoft.EntityFrameworkCore.Relational](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Relational/10.0.11) `10.0.11` *(Fix conflict package version with transitive in DataAccess)*
+- [Microsoft.Extensions.Configuration.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.11) `10.0.11` *(Fix conflict package version with transitive in DataAccess)*
 
-- [Elastic.Clients.Elasticsearch](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch/9.4.2) `9.4.2` *(For Searching Data)*
+- [Elastic.Clients.Elasticsearch](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch/9.5.0) `9.5.0` *(For Searching Data)*
 
 ### DataAccess Layer
 - [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/10.0.3) `10.0.3`
-- [Microsoft.EntityFrameworkCore.Tools](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools/10.0.10) `10.0.10` *(For scraffold)*
-- [Microsoft.EntityFrameworkCore.Design](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design/10.0.10) `10.0.10` *(For scraffold)*
+- [Microsoft.EntityFrameworkCore.Tools](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools/10.0.11) `10.0.11` *(For scraffold)*
+- [Microsoft.EntityFrameworkCore.Design](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design/10.0.11) `10.0.11` *(For scraffold)*
 
 ## How to use
 ### Create database and scraffold
