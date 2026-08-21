@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+option csharp_namespace = "AppGrpc.Protos";
+
+package media_service;
+
+import "Protos/models.proto";
