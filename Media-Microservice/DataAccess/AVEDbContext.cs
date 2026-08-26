@@ -36,10 +36,6 @@ public partial class AVEDbContext : DbContext
 
     public virtual DbSet<VideoImage> VideoImages { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Database=avedia_media;Username=postgres;Password=Johnny@1411!");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasAnnotation("Npgsql:CollationDefinition:public.case_insensitive", "und-u-ks-level1,und-u-ks-level1,icu,False");

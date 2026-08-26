@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Implements;
 
-public class VideoService(IUnitOfWork unitOfWork, ElasticsearchClient elasticClient)
+public class VideoService(IUnitOfWork unitOfWork, ElasticsearchClient elasticClient) : IVideoService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ElasticsearchClient _elasticClient = elasticClient;

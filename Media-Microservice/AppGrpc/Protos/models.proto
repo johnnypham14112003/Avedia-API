@@ -52,15 +52,15 @@ message GenreInfo {
 
 message VideoInfo {
     string id = 1;
-    optional string code = 1;
-    string title = 2;
-    string original_title = 2;
-    optional string description = 3;
-    int32 duration_minutes = 1;
-    optional string series = 3;
-    int32 episode = 1;
-    optional string director = 4;
-    optional string release_date = 4;
-    optional string language = 4;
-    string status = 4;
+    optional string code = 2;
+    string title = 3;
+    string original_title = 4;
+    optional string description = 5;
+    int32 duration_minutes = 6;
+    optional string series = 7;
+    int32 episode = 8;
+    optional string director = 9;
+    optional string release_date = 10;
+    optional string language = 11;
+    string status = 12;
 }

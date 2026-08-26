@@ -5,3 +5,59 @@ option csharp_namespace = "AppGrpc.Protos";
 package media_service;
 
 import "Protos/models.proto";
+
+service VideoGrpcService {
+    rpc CreateVideo (VideoRequest) returns (VideoResponse);
+    rpc GetVideoDetail (VideoGetter) returns (VideoResponse);
+    rpc GetVideosPage (VideoPageRequest) returns (VideoPageResponse);
+    rpc UpdateVideo (VideoRequest) returns (VideoResponse);
+	rpc DeleteVideo (VideoGetter) returns (VideoResponse);
+}
+
+// ------ Request
+message VideoRequest {
+    VideoInfo video_info = 1;
+}
+
+message VideoGetter {
+    string id = 1;
+}
+
+message VideoQuery {
+    optional string code = 1;
+    string title = 2;
+    string original_title = 3;
+    optional int32 duration_minutes = 4;
+    optional string series = 5;
+    optional string director = 6;
+    optional string from_release_date = 7;
+    optional string to_release_date = 8;
+    optional string language = 9;
+    string status = 10;
+    optional int32 order_by = 11;
+    optional string genre_id = 12;
+    optional string tag_id = 13;
+}
+
+message VideoPageRequest {
+    PageQueryRequest page_query_request = 1;
+    VideoQuery advance_input = 2;
+}
+
+// ------ Response
+message VideoResponse {
+    ResultResponse result_response = 1;
+
+    // Below is optional return (can be nullable)
+    VideoInfo video_info = 2;
+}
+
+message VideoPageResponse{
+    ResultResponse result_response = 1;
+
+    message VideoPagedResult {
+        BasePageResult base_page_result = 1;
+        repeated VideoInfo data_list = 2; 
+    }
+    VideoPagedResult paged_data = 2;
+}
